@@ -1,5 +1,14 @@
 <script setup>
+import { ref } from 'vue';
 import '@/assets/style.css'
+
+const searchQuery = ref('');
+
+const search = () => {
+  if (!searchQuery.value.trim()) return;
+  const params = new URLSearchParams({ q: searchQuery.value.trim() });
+  window.location.href = `/search?${params.toString()}`;
+};
 </script>
 
 <template>
@@ -15,7 +24,13 @@ import '@/assets/style.css'
 
       <div class="header-center">
         <div class="search-container">
-          <input type="text" placeholder="検索..." class="search-input" />
+          <input
+            v-model="searchQuery"
+            type="text"
+            placeholder="キーワードで検索"
+            class="search-input"
+            @keydown.enter="search"
+          />
         </div>
       </div>
 
