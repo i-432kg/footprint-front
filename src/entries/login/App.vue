@@ -1,6 +1,6 @@
 <script setup>
-import { ref, reactive } from 'vue';
-import axios from 'axios';
+import { ref } from 'vue';
+import LoginForm from '@/components/login/LoginForm.vue';
 import RegisterModal from '@/components/login/RegisterModal.vue';
 
 /**
@@ -10,29 +10,9 @@ import RegisterModal from '@/components/login/RegisterModal.vue';
  * - 既存ユーザーのログイン処理
  * - 新規ユーザー登録モーダルの制御（入力・確認・送信）
  */
-const loginForm = reactive({
-  userId: '',
-  password: ''
-});
-const isLoggingIn = ref(false);
 
+/** 新規登録モーダル表示フラグ */
 const showRegisterModal = ref(false);
-
-const handleLogin = async () => {
-  if (isLoggingIn.value) return;
-  isLoggingIn.value = true;
-  try {
-    const params = new URLSearchParams();
-    params.append('loginId', loginForm.userId);
-    params.append('password', loginForm.password);
-    await axios.post('/api/login', params);
-    window.location.href = '/timeline'; // 成功したらタイムラインへ
-  } catch (error) {
-    alert('ログインに失敗しました。IDまたはパスワードを確認してください。');
-  } finally {
-    isLoggingIn.value = false;
-  }
-};
 
 /** 登録完了時の処理 */
 const onRegistered = () => {
@@ -46,7 +26,8 @@ const onRegistered = () => {
       <v-container>
         <v-row justify="center">
           <v-col cols="12" sm="8" md="4">
-            <!-- ログインモーダル -->
+
+            <!-- ヘッダーエリア -->
             <v-card rounded="xl" elevation="12" class="pa-6">
               <v-card-item class="text-center mb-6">
                 <v-card-title class="text-h3 font-weight-black text-primary mb-2">
@@ -57,39 +38,8 @@ const onRegistered = () => {
                 </v-card-subtitle>
               </v-card-item>
 
-              <v-form @submit.prevent="handleLogin">
-                <v-text-field
-                  v-model="loginForm.userId"
-                  label="ユーザーID"
-                  prepend-inner-icon="mdi-account"
-                  variant="outlined"
-                  class="mb-2"
-                  rounded="lg"
-                  required
-                ></v-text-field>
-
-                <v-text-field
-                  v-model="loginForm.password"
-                  label="パスワード"
-                  prepend-inner-icon="mdi-lock"
-                  type="password"
-                  variant="outlined"
-                  class="mb-4"
-                  rounded="lg"
-                  required
-                ></v-text-field>
-
-                <v-btn
-                  type="submit"
-                  color="primary"
-                  block
-                  size="large"
-                  rounded="pill"
-                  :loading="isLoggingIn"
-                >
-                  ログイン
-                </v-btn>
-              </v-form>
+              <!-- ログインフォーム -->
+              <LoginForm />
 
               <v-divider class="my-8">
                 <span class="text-caption text-grey mx-2">または</span>
