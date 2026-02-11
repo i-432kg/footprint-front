@@ -2,6 +2,7 @@ import {fileURLToPath, URL} from 'node:url'
 
 import {defineConfig} from 'vite'
 import vue from '@vitejs/plugin-vue'
+import vuetify from "vite-plugin-vuetify";
 import vueDevTools from 'vite-plugin-vue-devtools'
 import devtoolsJson from "vite-plugin-devtools-json";
 import { resolve } from 'path'
@@ -10,6 +11,7 @@ import { resolve } from 'path'
 export default defineConfig({
   plugins: [
     vue(),
+    vuetify({ autoImport: true }),
     vueDevTools(),
     devtoolsJson(),
   ],
@@ -30,10 +32,10 @@ export default defineConfig({
     rollupOptions: {
       input: {
         // 各画面ごとのエントリーポイントを定義
-        // login: resolve(__dirname, 'src/entries/login/main.js'),
-        // map: resolve(__dirname, 'src/entries/map/main.js'),
-        // mypage: resolve(__dirname, 'src/entries/mypage/main.js'),
-        // search: resolve(__dirname, 'src/entries/search/main.js'),
+        login: resolve(__dirname, 'src/entries/login/main.js'),
+        map: resolve(__dirname, 'src/entries/map/main.js'),
+        mypage: resolve(__dirname, 'src/entries/mypage/main.js'),
+        search: resolve(__dirname, 'src/entries/search/main.js'),
         timeline: resolve(__dirname, 'src/entries/timeline/main.js'),
       },
       output: {

@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 import axios from 'axios';
 
 /**
@@ -29,9 +29,14 @@ const replyContent = ref('');
 // 送信中フラグ（二重送信防止）
 const isSubmitting = ref(false);
 
+/** ダイアログの開閉状態を管理する */
+const dialog = ref(true);
+
+/** 入力チェック */
+const isValid = computed(() => !!replyContent.value.trim());
+
 const submitReply = async () => {
-  // 空文字や空白のみNG
-  if (!replyContent.value.trim()) return;
+  if (!isValid.value) return;
 
   isSubmitting.value = true;
   try {
@@ -54,25 +59,69 @@ const submitReply = async () => {
     isSubmitting.value = false;
   }
 };
+
+/** モーダル外側をクリックした時などのイベント監視 */
+const updateDialog = (val) => {
+  if (!val) emit('close');
+};
 </script>
 
 <template>
-  <div class="modal-overlay" @click.self="emit('close')">
-    <div class="modal-window">
-      <h3>返信を投稿</h3>
+  <v-dialog
+    v-model="dialog"
+    max-width="500"
+    persistent
+    @update:model-value="updateDialog"
+  >
+    <v-card rounded="xl" class="pa-2">
+      <!-- ヘッダー -->
+      <v-card-title class="text-h6 font-weight-bold">
+        返信を投稿
+      </v-card-title>
 
-      <textarea v-model="replyContent" placeholder="返信を入力してください" rows="4"></textarea>
-      <div class="modal-footer">
-        <!-- 送信中は操作を止める -->
-        <button class="btn-text" @click="emit('close')" :disabled="isSubmitting">キャンセル</button>
+      <!-- 入力欄 -->
+      <v-card-text>
+        <v-textarea
+          v-model="replyContent"
+          placeholder="返信を入力してください"
+          variant="filled"
+          auto-grow
+          rows="4"
+          hide-details="auto"
+          bg-color="grey-lighten-4"
+          color="primary"
+          class="rounded-lg"
+          :disabled="isSubmitting"
+          counter
+        ></v-textarea>
+      </v-card-text>
 
-        <!-- 空入力・送信中は押せない -->
-        <button class="btn-primary" @click="submitReply" :disabled="isSubmitting || !replyContent.trim()">
-          {{ isSubmitting ? '送信中...' : '返信する' }}
-        </button>
-      </div>
-    </div>
-  </div>
+      <!-- フッター -->
+      <v-card-actions class="pa-4">
+        <v-btn
+          variant="text"
+          color="grey-darken-1"
+          rounded="pill"
+          :disabled="isSubmitting"
+          @click="emit('close')"
+        >
+          キャンセル
+        </v-btn>
+        <v-spacer></v-spacer>
+        <v-btn
+          color="primary"
+          variant="flat"
+          rounded="pill"
+          min-width="100"
+          :loading="isSubmitting"
+          :disabled="!isValid"
+          @click="submitReply"
+        >
+          返信する
+        </v-btn>
+      </v-card-actions>
+    </v-card>
+  </v-dialog>
 </template>
 
 <style scoped>

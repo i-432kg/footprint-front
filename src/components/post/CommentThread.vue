@@ -21,8 +21,9 @@ const emit = defineEmits(['reply']);
 </script>
 
 <template>
-  <div class="comment-thread">
-    <div class="reply-chain" v-if="replies.length > 0">
+  <v-list class="comment-thread bg-transparent" aria-label="返信一覧">
+    <!-- 返信がある場合のリスト表示 -->
+    <div v-if="replies.length > 0" class="reply-chain pl-2 pl-sm-4">
       <ReplyItem
         v-for="reply in replies"
         :key="reply.id"
@@ -30,23 +31,23 @@ const emit = defineEmits(['reply']);
         @reply="(id) => emit('reply', id)"
       />
     </div>
-  </div>
+
+    <!-- 返信がまだない場合のメッセージ -->
+    <v-list-item v-else class="text-center text-caption text-medium-emphasis py-4">
+      まだ返信はありません。
+    </v-list-item>
+  </v-list>
 </template>
 
 <style scoped>
-/* 返信一覧 */
 .comment-thread {
-  display: flex;
-  flex-direction: column;
   position: relative;
-  margin-top: 16px;
 }
 
-/* 1階層目の返信リストのインデント */
 .reply-chain {
-  margin-left: 20px;
+  border-left: 1px solid rgba(var(--v-border-color), 0.12);
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 16px;
 }
 </style>

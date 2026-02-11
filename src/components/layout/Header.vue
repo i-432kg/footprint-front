@@ -1,111 +1,56 @@
 <script setup>
 import { ref } from 'vue';
-import '@/assets/style.css'
 
 const searchQuery = ref('');
 
 const search = () => {
-  if (!searchQuery.value.trim()) return;
-  const params = new URLSearchParams({ q: searchQuery.value.trim() });
+  const query = (searchQuery.value || '').trim();
+
+  // 未入力の場合は検索しない
+  if (!query) return;
+
+  const params = new URLSearchParams({ q: query });
   window.location.href = `/search?${params.toString()}`;
 };
 </script>
 
 <template>
-  <header class="app-header">
-    <div class="header-inner">
-      <div class="header-left">
-        <a href="/" class="logo">LOGO</a>
-        <nav class="nav-links">
-          <a href="/map">Maps</a>
-          <a href="/timeline" class="active">TL</a>
-        </nav>
-      </div>
+  <v-app-bar color="white" flat border density="compact" class="px-4">
+    <!-- ロゴ -->
+    <v-app-bar-title class="flex-shrink-0" style="min-width: 100px;">
+      <v-btn variant="plain" href="/" class="text-h6 font-weight-bold text-primary pa-0">
+        LOGO
+      </v-btn>
+    </v-app-bar-title>
 
-      <div class="header-center">
-        <div class="search-container">
-          <input
-            v-model="searchQuery"
-            type="text"
-            placeholder="キーワードで検索"
-            class="search-input"
-            @keydown.enter="search"
-          />
-        </div>
-      </div>
+    <!-- ナビゲーション -->
+    <v-btn variant="text" href="/map" class="hidden-sm-and-down">Maps</v-btn>
+    <v-btn variant="text" href="/timeline" class="hidden-sm-and-down text-primary border-b-lg">TL</v-btn>
 
-      <div class="header-right">
-        <a href="/mypage" class="icon-link">MyPage</a>
-      </div>
-    </div>
-  </header>
+    <v-spacer></v-spacer>
+
+    <!-- 検索バー -->
+    <v-responsive max-width="400" class="mx-4">
+      <v-text-field
+        v-model="searchQuery"
+        prepend-inner-icon="mdi-magnify"
+        placeholder="キーワードで検索"
+        variant="solo-filled"
+        flat
+        hide-details
+        rounded="pill"
+        density="compact"
+        @keydown.enter="search"
+      ></v-text-field>
+    </v-responsive>
+
+    <v-spacer></v-spacer>
+
+    <!-- マイページ -->
+    <v-btn icon="mdi-account-circle" href="/mypage" title="MyPage"></v-btn>
+  </v-app-bar>
 </template>
 
 <style scoped>
-.app-header {
-  position: sticky;
-  top: 0;
-  z-index: 100;
-  background: #ffffff;
-  border-bottom: 1px solid var(--border-color);
-  height: 60px;
-}
 
-.header-inner {
-  max-width: 1200px;
-  margin: 0 auto;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 20px;
-}
-
-.header-left {
-  display: flex;
-  align-items: center;
-  gap: 30px;
-}
-
-.logo {
-  font-weight: bold;
-  font-size: 1.5rem;
-  text-decoration: none;
-  color: var(--primary-color);
-}
-
-.nav-links {
-  display: flex;
-  gap: 20px;
-}
-
-.nav-links a {
-  text-decoration: none;
-  color: #555;
-  font-weight: 500;
-}
-
-.nav-links a.active {
-  color: var(--primary-color);
-  border-bottom: 2px solid var(--primary-color);
-}
-
-.header-center {
-  flex: 1;
-  max-width: 400px;
-  margin: 0 20px;
-}
-
-.search-input {
-  width: 100%;
-  padding: 8px 16px;
-  border-radius: 20px;
-  border: 1px solid var(--border-color);
-  background: #f0f2f5;
-}
-
-.icon-link {
-  text-decoration: none;
-  color: #333;
-}
 </style>

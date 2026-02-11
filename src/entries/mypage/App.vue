@@ -21,7 +21,7 @@ const myPosts = ref([]);
 /** 自分のコメントリスト */
 const myComments = ref([]);
 
-/** 現在選択されているタブ ('posts' | 'comments') */
+/** 現在選択されているタブ */
 const activeTab = ref('posts');
 
 const selectedPost = ref(null);
@@ -51,203 +51,100 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="app-wrapper">
+  <v-app>
     <TheHeader />
 
-    <main class="mypage-container">
-      <!-- プロフィールセクション -->
-      <section class="profile-header">
-        <div class="user-info">
-          <div class="avatar-placeholder">{{ user.name.charAt(0) }}</div>
-          <div class="user-details">
-            <h1>{{ user.name }}</h1>
-            <div class="stats">
-              <span><strong>{{ user.postCount }}</strong> 投稿</span>
+    <v-main class="bg-grey-lighten-4">
+      <v-container class="py-10" style="max-width: 900px;">
+
+        <!-- プロフィールセクション -->
+        <v-row align="center" class="mb-8">
+          <v-col cols="auto">
+            <v-avatar color="primary" size="80" class="text-h4 text-white">
+              {{ user.name.charAt(0) }}
+            </v-avatar>
+          </v-col>
+          <v-col>
+            <h1 class="text-h4 font-weight-bold mb-2">{{ user.name }}</h1>
+            <div class="text-subtitle-1 text-medium-emphasis">
+              <span class="mr-6"><strong>{{ user.postCount }}</strong> 投稿</span>
               <span><strong>{{ user.commentCount }}</strong> コメント</span>
             </div>
-          </div>
-        </div>
-      </section>
+          </v-col>
+        </v-row>
 
-      <!-- タブナビゲーション -->
-      <nav class="tab-nav">
-        <button
-          :class="['tab-btn', { active: activeTab === 'posts' }]"
-          @click="activeTab = 'posts'"
-        >
-          自分の投稿
-        </button>
-        <button
-          :class="['tab-btn', { active: activeTab === 'comments' }]"
-          @click="activeTab = 'comments'"
-        >
-          コメント履歴
-        </button>
-      </nav>
+        <!-- コンテンツエリア（タブ切り替え） -->
+        <v-card>
+          <v-tabs v-model="activeTab" color="primary" grow>
+            <v-tab value="posts">自分の投稿</v-tab>
+            <v-tab value="comments">コメント履歴</v-tab>
+          </v-tabs>
 
-      <!-- コンテンツエリア -->
-      <div class="content-area">
-        <!-- 投稿一覧 -->
-        <div v-if="activeTab === 'posts'" class="post-grid">
-          <div v-if="myPosts.length === 0" class="empty-msg">まだ投稿がありません。</div>
-          <article
-            v-for="post in myPosts"
-            :key="post.id"
-            class="post-card"
-            @click="openDetail(post)"
-          >
-            <img v-if="post.imageUrl" :src="post.imageUrl" alt="投稿画像" class="post-image"/>
-            <div class="post-info">
-              <span class="post-date">{{ formatDate(post.createdAt) }}</span>
-            </div>
-          </article>
-        </div>
+          <v-divider></v-divider>
 
-        <!-- コメント一覧 -->
-        <div v-if="activeTab === 'comments'" class="comment-list">
-          <div v-if="myComments.length === 0" class="empty-msg">まだコメントがありません。</div>
-          <div
-            v-for="comment in myComments"
-            :key="comment.id"
-            class="comment-item"
-          >
-            <div class="comment-context">
-              <span class="target-post">投稿: {{ comment.postTitle || '無題の投稿' }}</span>
-              <span class="comment-date">{{ formatDate(comment.createdAt) }}</span>
-            </div>
-            <p class="comment-text">{{ comment.content }}</p>
-          </div>
-        </div>
-      </div>
-    </main>
+          <v-card-text class="pa-6">
+            <v-window v-model="activeTab">
+
+              <!-- 投稿一覧タブ -->
+              <v-window-item value="posts">
+                <div v-if="myPosts.length === 0" class="text-center py-10 text-grey">
+                  まだ投稿がありません。
+                </div>
+                <v-row v-else>
+                  <v-col
+                    v-for="post in myPosts"
+                    :key="post.id"
+                    cols="12" sm="6" md="4"
+                  >
+                    <v-card hover @click="openDetail(post)">
+                      <v-img
+                        v-if="post.imageUrl"
+                        :src="post.imageUrl"
+                        alt="投稿画像"
+                        aspect-ratio="1"
+                        cover
+                      ></v-img>
+                      <v-card-subtitle class="py-2 text-caption">
+                        {{ formatDate(post.createdAt) }}
+                      </v-card-subtitle>
+                    </v-card>
+                  </v-col>
+                </v-row>
+              </v-window-item>
+
+              <!-- コメント一覧タブ -->
+              <v-window-item value="comments">
+                <div v-if="myComments.length === 0" class="text-center py-10 text-grey">
+                  まだコメントがありません。
+                </div>
+                <v-list v-else lines="two" class="bg-transparent">
+                  <v-list-item
+                    v-for="comment in myComments"
+                    :key="comment.id"
+                    class="mb-4 border rounded-lg bg-white"
+                  >
+                    <v-list-item-title class="text-subtitle-2 font-weight-bold">
+                      投稿: {{ comment.postTitle || '無題の投稿' }}
+                    </v-list-item-title>
+                    <v-list-item-subtitle class="text-caption mb-2">
+                      {{ formatDate(comment.createdAt) }}
+                    </v-list-item-subtitle>
+                    <p class="text-body-2">{{ comment.content }}</p>
+                  </v-list-item>
+                </v-list>
+              </v-window-item>
+
+            </v-window>
+          </v-card-text>
+        </v-card>
+      </v-container>
+    </v-main>
 
     <!-- 投稿詳細モーダル -->
     <PostDetailModal v-if="selectedPost" :post="selectedPost" @close="closeDetail" />
-  </div>
+  </v-app>
 </template>
 
 <style scoped>
-.mypage-container {
-  max-width: 900px;
-  margin: 0 auto;
-  padding: 40px 20px;
-}
 
-.profile-header {
-  margin-bottom: 40px;
-}
-.user-info {
-  display: flex;
-  align-items: center;
-  gap: 24px;
-}
-.avatar-placeholder {
-  width: 80px;
-  height: 80px;
-  background-color: var(--primary-color, #42b983);
-  color: white;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 2rem;
-  font-weight: bold;
-}
-.user-details h1 {
-  margin: 0 0 8px 0;
-  font-size: 1.5rem;
-}
-.stats {
-  display: flex;
-  gap: 20px;
-  color: #666;
-}
-
-.tab-nav {
-  display: flex;
-  border-bottom: 1px solid #ddd;
-  margin-bottom: 24px;
-}
-.tab-btn {
-  padding: 12px 24px;
-  border: none;
-  background: none;
-  cursor: pointer;
-  font-weight: bold;
-  color: #666;
-  position: relative;
-}
-.tab-btn.active {
-  color: var(--primary-color, #42b983);
-}
-.tab-btn.active::after {
-  content: '';
-  position: absolute;
-  bottom: -1px;
-  left: 0;
-  right: 0;
-  height: 2px;
-  background-color: var(--primary-color, #42b983);
-}
-
-.post-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 16px;
-}
-.post-card {
-  border: 1px solid #eee;
-  border-radius: 8px;
-  overflow: hidden;
-  cursor: pointer;
-  transition: transform 0.2s;
-}
-.post-card:hover {
-  transform: translateY(-4px);
-}
-.post-image {
-  width: 100%;
-  aspect-ratio: 1;
-  object-fit: cover;
-}
-.post-info {
-  padding: 8px;
-  font-size: 0.8rem;
-  color: #999;
-}
-
-.comment-list {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-.comment-item {
-  background: #f9f9f9;
-  padding: 16px;
-  border-radius: 8px;
-  border-left: 4px solid var(--primary-color, #42b983);
-}
-.comment-context {
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 8px;
-  font-size: 0.85rem;
-}
-.target-post {
-  font-weight: bold;
-  color: #555;
-}
-.comment-date {
-  color: #999;
-}
-.comment-text {
-  margin: 0;
-  line-height: 1.5;
-}
-
-.empty-msg {
-  text-align: center;
-  padding: 40px;
-  color: #999;
-}
 </style>

@@ -23,28 +23,19 @@ const registerForm = reactive({
 });
 const isRegistering = ref(false);
 
-/**
- * 登録ステップの定義（定数）
- */
-const REGISTER_STEPS = {
+/** 登録ステップ */
+const step = ref(1);
+
+/** 登録ステップ */
+const STEPS = {
   INPUT: 'input',
   CONFIRM: 'confirm',
 };
 
-/**
- * 登録ステップの初期値
- */
-const registerStep = ref(REGISTER_STEPS.INPUT);
+/** 現在の登録ステップ */
+const currentStep = ref(STEPS.INPUT);
 
-const isInputStep = computed(() => registerStep.value === REGISTER_STEPS.INPUT);
-const isConfirmStep = computed(() => registerStep.value === REGISTER_STEPS.CONFIRM);
 
-const goToConfirm = () => { registerStep.value = REGISTER_STEPS.CONFIRM; };
-const goToInput = () => { registerStep.value = REGISTER_STEPS.INPUT; };
-
-/**
- * ログイン処理
- */
 const handleLogin = async () => {
   if (isLoggingIn.value) return;
   isLoggingIn.value = true;
@@ -84,170 +75,154 @@ const handleRegister = async () => {
  */
 const closeRegisterModal = () => {
   showRegisterModal.value = false;
-  registerStep.value = REGISTER_STEPS.INPUT;
+  step.value = 1;
+  currentStep.value = STEPS.INPUT;
 };
 </script>
 
 <template>
-  <div class="login-page">
-    <div class="login-container">
-      <h1 class="logo">Footprint</h1>
-      <p class="subtitle">思い出の場所を共有しよう</p>
+  <v-app>
+    <v-main class="bg-grey-lighten-4 d-flex align-center justify-center">
+      <v-container>
+        <v-row justify="center">
+          <v-col cols="12" sm="8" md="4">
+            <!-- ログインモーダル -->
+            <v-card rounded="xl" elevation="12" class="pa-6">
+              <v-card-item class="text-center mb-6">
+                <v-card-title class="text-h3 font-weight-black text-primary mb-2">
+                  Footprint
+                </v-card-title>
+                <v-card-subtitle class="text-body-1">
+                  思い出の場所を共有しよう
+                </v-card-subtitle>
+              </v-card-item>
 
-      <!-- ログインフォーム -->
-      <form class="login-form" @submit.prevent="handleLogin">
-        <div class="form-group">
-          <input v-model="loginForm.userId" type="text" placeholder="ユーザーID" required />
-        </div>
-        <div class="form-group">
-          <input v-model="loginForm.password" type="password" placeholder="パスワード" required />
-        </div>
-        <button type="submit" class="btn-primary full-width" :disabled="isLoggingIn">
-          {{ isLoggingIn ? 'ログイン中...' : 'ログイン' }}
-        </button>
-      </form>
+              <v-form @submit.prevent="handleLogin">
+                <v-text-field
+                  v-model="loginForm.userId"
+                  label="ユーザーID"
+                  prepend-inner-icon="mdi-account"
+                  variant="outlined"
+                  class="mb-2"
+                  rounded="lg"
+                  required
+                ></v-text-field>
 
-      <div class="divider">
-        <span>または</span>
-      </div>
+                <v-text-field
+                  v-model="loginForm.password"
+                  label="パスワード"
+                  prepend-inner-icon="mdi-lock"
+                  type="password"
+                  variant="outlined"
+                  class="mb-4"
+                  rounded="lg"
+                  required
+                ></v-text-field>
 
-      <button class="btn-text" @click="showRegisterModal = true">
-        新しくアカウントを作成する
-      </button>
-    </div>
+                <v-btn
+                  type="submit"
+                  color="primary"
+                  block
+                  size="large"
+                  rounded="pill"
+                  :loading="isLoggingIn"
+                >
+                  ログイン
+                </v-btn>
+              </v-form>
+
+              <v-divider class="my-8">
+                <span class="text-caption text-grey mx-2">または</span>
+              </v-divider>
+
+              <v-btn
+                variant="text"
+                block
+                class="text-none"
+                @click="showRegisterModal = true"
+              >
+                新しくアカウントを作成する
+              </v-btn>
+            </v-card>
+          </v-col>
+        </v-row>
+      </v-container>
+    </v-main>
 
     <!-- 新規登録モーダル -->
-    <div v-if="showRegisterModal" class="modal-overlay" @click.self="closeRegisterModal">
-      <div class="modal-window">
-        <div class="modal-header">
-          <h3>{{ isInputStep ? 'アカウント作成' : '登録内容の確認' }}</h3>
-        </div>
+    <v-dialog v-model="showRegisterModal" max-width="500" persistent>
+      <v-card rounded="xl">
+        <v-card-title class="pa-6 text-h5 font-weight-bold">
+          {{ currentStep === STEPS.INPUT ? 'アカウント作成' : '登録内容の確認' }}
+        </v-card-title>
 
-        <!-- ステップ1: 入力 -->
-        <div v-if="isInputStep" class="register-body">
-          <div class="form-group">
-            <label>ユーザーID</label>
-            <input v-model="registerForm.userId" type="text" />
-          </div>
-          <div class="form-group">
-            <label>パスワード</label>
-            <input v-model="registerForm.password" type="password" />
-          </div>
-          <div class="form-group">
-            <label>生年月日</label>
-            <input v-model="registerForm.birthDate" type="date" />
-          </div>
-        </div>
+        <v-card-text class="pa-6 pt-0">
+          <v-window v-model="currentStep">
+            <!-- ステップ1: 入力 -->
+            <v-window-item :value="STEPS.INPUT">
+              <v-text-field
+                v-model="registerForm.userId"
+                label="ユーザーID"
+                variant="filled"
+                class="mb-2"
+              ></v-text-field>
+              <v-text-field
+                v-model="registerForm.password"
+                label="パスワード"
+                type="password"
+                variant="filled"
+                class="mb-2"
+              ></v-text-field>
+              <v-text-field
+                v-model="registerForm.birthDate"
+                label="生年月日"
+                type="date"
+                variant="filled"
+              ></v-text-field>
+            </v-window-item>
 
-        <!-- ステップ2: 確認 -->
-        <div v-else-if="isConfirmStep" class="register-body confirm-view">
-          <p>以下の内容で登録しますか？</p>
-          <dl>
-            <dt>ユーザーID</dt><dd>{{ registerForm.userId }}</dd>
-            <dt>生年月日</dt><dd>{{ registerForm.birthDate }}</dd>
-          </dl>
-        </div>
+            <!-- ステップ2: 確認 -->
+            <v-window-item :value="STEPS.CONFIRM">
+              <v-alert
+                type="info"
+                variant="tonal"
+                class="mb-4"
+                text="以下の内容で登録しますか？"
+              ></v-alert>
+              <v-list class="bg-grey-lighten-4 rounded-lg">
+                <v-list-item title="ユーザーID" :subtitle="registerForm.userId"></v-list-item>
+                <v-list-item title="生年月日" :subtitle="registerForm.birthDate"></v-list-item>
+              </v-list>
+            </v-window-item>
+          </v-window>
+        </v-card-text>
 
-        <div class="modal-footer">
-          <button class="btn-text" @click="isInputStep ? closeRegisterModal() : goToInput()">
-            {{ registerStep === 1 ? 'キャンセル' : '戻る' }}
-          </button>
-          <button
-            class="btn-primary"
-            @click="isInputStep ? goToConfirm() : handleRegister()"
-            :disabled="isRegistering"
+        <v-card-actions class="pa-6 pt-0">
+          <v-btn
+            variant="text"
+            color="grey-darken-1"
+            rounded="pill"
+            @click="currentStep === STEPS.INPUT ? closeRegisterModal() : currentStep = STEPS.INPUT"
           >
-            {{ isInputStep ? '次へ' : (isRegistering ? '登録中...' : '登録する') }}
-          </button>
-        </div>
-      </div>
-    </div>
-  </div>
+            {{ step === 1 ? 'キャンセル' : '戻る' }}
+          </v-btn>
+          <v-spacer></v-spacer>
+          <v-btn
+            color="primary"
+            variant="flat"
+            rounded="pill"
+            min-width="120"
+            :loading="isRegistering"
+            @click="currentStep === STEPS.INPUT ? currentStep = STEPS.CONFIRM : handleRegister()"
+          >
+            {{ step === 1 ? '次へ' : '登録する' }}
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+  </v-app>
 </template>
 
 <style scoped>
-.login-page {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 100vh;
-  padding: 20px;
-}
 
-.login-container {
-  background: white;
-  padding: 40px;
-  border-radius: 20px;
-  box-shadow: 0 4px 24px rgba(0,0,0,0.1);
-  width: 100%;
-  max-width: 400px;
-  text-align: center;
-}
-
-.logo {
-  font-size: 2.5rem;
-  color: var(--primary-color);
-  margin-bottom: 8px;
-}
-
-.subtitle {
-  color: var(--text-muted);
-  margin-bottom: 32px;
-}
-
-.form-group {
-  margin-bottom: 16px;
-  text-align: left;
-}
-
-.form-group label {
-  display: block;
-  font-size: 0.9rem;
-  margin-bottom: 4px;
-  color: var(--text-main);
-}
-
-.form-group input {
-  width: 100%;
-  padding: 12px;
-  border: 1px solid var(--border-color);
-  border-radius: 8px;
-  font-size: 1rem;
-}
-
-.divider {
-  margin: 24px 0;
-  border-bottom: 1px solid var(--border-color);
-  position: relative;
-}
-
-.divider span {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  background: white;
-  padding: 0 10px;
-  font-size: 0.8rem;
-  color: var(--text-muted);
-}
-
-.full-width {
-  width: 100%;
-}
-
-.confirm-view dl {
-  text-align: left;
-  background: var(--bg-color);
-  padding: 16px;
-  border-radius: 8px;
-}
-.confirm-view dt {
-  font-size: 0.8rem;
-  color: var(--text-muted);
-}
-.confirm-view dd {
-  margin: 0 0 12px 0;
-  font-weight: bold;
-}
 </style>

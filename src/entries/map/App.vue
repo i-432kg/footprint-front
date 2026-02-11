@@ -5,23 +5,22 @@ import PostMap from '@/components/post/PostMap.vue';
 </script>
 
 <template>
-  <div class="app-container">
+  <v-app>
     <Header />
-    <main class="app-main">
-      <PostMap />
-    </main>
+
+    <v-main>
+      <v-container fluid class="pa-0 fill-height">
+        <!-- 投稿マップ -->
+        <PostMap />
+      </v-container>
+    </v-main>
+
     <Footer />
-  </div>
+  </v-app>
 </template>
 
 <style scoped>
-.app-container {
-  display: flex;
-  flex-direction: column;
-  min-height: 100vh;
-}
-
-.app-main {
-  flex: 1;
+.fill-height {
+  height: 100%;
 }
 </style>

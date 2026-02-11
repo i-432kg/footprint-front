@@ -11,48 +11,65 @@ const openDetailModal = () => {
 </script>
 
 <template>
-  <div class="post-popup">
-    <div v-if="post.imageUrl" class="popup-image-container" @click="openDetailModal" style="cursor: pointer;">
-      <img :src="post.imageUrl" alt="Post image" class="popup-image" />
-    </div>
-    <div class="popup-content">
-      <p class="popup-text">{{ post.comment }}</p>
-      <div class="popup-footer">
-        <small>{{ formatDate(post.createdAt) }}</small>
-      </div>
-    </div>
-  </div>
+  <v-card
+    variant="flat"
+    class="post-popup bg-transparent mx-n3 my-n2"
+    max-width="280"
+  >
+    <!-- 画像 -->
+    <v-img
+      v-if="post.imageUrl"
+      :src="post.imageUrl"
+      alt="投稿画像"
+      height="140"
+      cover
+      class="cursor-pointer rounded-t-lg"
+      @click="openDetailModal"
+    ></v-img>
+
+    <v-card-text class="pa-3">
+      <!-- 投稿コメント -->
+      <p class="text-body-2 mb-2 text-truncate-2">
+        {{ post.comment }}
+      </p>
+
+      <v-divider class="mb-2"></v-divider>
+
+      <!-- 日付と詳細リンク -->
+      <v-row align="center" no-gutters>
+        <span class="text-caption text-medium-emphasis">
+          {{ formatDate(post.createdAt) }}
+        </span>
+        <v-spacer></v-spacer>
+        <v-btn
+          variant="text"
+          color="primary"
+          size="x-small"
+          density="compact"
+          class="text-none"
+          @click="openDetailModal"
+        >
+          詳細を見る
+        </v-btn>
+      </v-row>
+    </v-card-text>
+  </v-card>
 </template>
 
 <style scoped>
 .post-popup {
-  max-width: 250px;
-  min-width: 150px;
+  min-width: 180px;
 }
 
-.popup-image-container {
-  margin-bottom: 8px;
+.cursor-pointer {
+  cursor: pointer;
+}
+
+/* 2行以上のコメントは省略表示する */
+.text-truncate-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
   overflow: hidden;
-  border-radius: 4px;
-}
-
-.popup-image {
-  width: 100%;
-  height: auto;
-  display: block;
-  object-fit: cover;
-}
-
-.popup-text {
-  margin: 4px 0;
-  word-break: break-all;
-  white-space: pre-wrap;
-}
-
-.popup-footer {
-  margin-top: 8px;
-  color: #666;
-  border-top: 1px solid #eee;
-  padding-top: 4px;
 }
 </style>

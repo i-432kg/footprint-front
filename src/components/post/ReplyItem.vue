@@ -57,81 +57,78 @@ const toggleChildren = async () => {
     }
   }
 };
-
-/**
- * 子返信の一覧を最新化する
- */
-const refreshChildren = async () => {
-  replyStore.expand(props.reply.id);
-  isLoading.value = true;
-  try {
-    await replyStore.fetchChildReplies(props.reply.id);
-  } finally {
-    isLoading.value = false;
-  }
-};
 </script>
 
 <template>
-  <div class="reply-section">
-    <div class="reply-item" :class="{ 'child-item': isChild }">
-      <!-- 返信本文 -->
-      <p class="reply-comment">{{ reply.content }}</p>
+  <div class="reply-wrapper mb-4">
+    <v-card
+      variant="outlined"
+      :color="isChild ? 'grey-lighten-3' : 'grey-lighten-2'"
+      :class="['rounded-lg', { 'bg-grey-lighten-5': isChild, 'bg-white': !isChild }]"
+    >
+      <v-card-text class="pa-3">
+        <!-- 返信本文 -->
+        <p class="text-body-2 mb-2" style="white-space: pre-wrap;">{{ reply.content }}</p>
 
-      <!-- 返信のメタ情報（日時）と返信ボタン -->
-      <div class="reply-footer">
-        <span class="reply-meta">{{ formatDate(reply.createdAt) }}</span>
-        <button class="btn-text" @click="emit('reply', reply.id)">返信する</button>
+        <!-- メタ情報と返信ボタン -->
+        <v-row align="center" no-gutters>
+          <span class="text-caption text-medium-emphasis">
+            {{ formatDate(reply.createdAt) }}
+          </span>
+          <v-spacer></v-spacer>
+          <v-btn
+            variant="text"
+            color="primary"
+            size="x-small"
+            rounded="pill"
+            prepend-icon="mdi-reply"
+            @click="emit('reply', reply.id)"
+          >
+            返信する
+          </v-btn>
+        </v-row>
+      </v-card-text>
+
+      <!-- 子返信の展開トリガー -->
+      <v-divider v-if="(reply.replyCount && reply.replyCount > 0) || children.length > 0"></v-divider>
+      <v-card-actions v-if="(reply.replyCount && reply.replyCount > 0) || children.length > 0" class="pa-1">
+        <v-btn
+          variant="text"
+          block
+          size="small"
+          class="text-none"
+          :loading="isLoading"
+          @click="toggleChildren"
+        >
+          <template v-slot:prepend>
+            <v-icon :icon="showChildren ? 'mdi-chevron-down' : 'mdi-chevron-right'"></v-icon>
+          </template>
+          {{ showChildren ? '返信を非表示' : `${reply.replyCount || children.length} 件の返信を表示` }}
+        </v-btn>
+      </v-card-actions>
+    </v-card>
+
+    <!-- 子返信一覧 -->
+    <v-expand-transition>
+      <div v-if="showChildren" class="child-replies mt-2 ml-4 ml-sm-8">
+        <ReplyItem
+          v-for="child in children"
+          :key="child.id"
+          :reply="child"
+          :isChild="true"
+          @reply="(id) => emit('reply', id)"
+        />
       </div>
-
-      <div v-if="(reply.replyCount && reply.replyCount > 0) || children.length > 0" class="child-reply-trigger">
-        <button class="btn-text load-more-btn" @click="toggleChildren">
-          <span v-if="!showChildren">▶ {{ reply.replyCount || children.length }} 件の返信を表示</span>
-          <span v-else>▼ 返信を非表示</span>
-          <span v-if="isLoading" class="loading-mini">...</span>
-        </button>
-      </div>
-    </div>
-
-    <!-- 子返信一覧（開いているときだけ表示） -->
-    <div class="child-replies" v-if="showChildren">
-      <ReplyItem
-        v-for="child in children"
-        :key="child.id"
-        :reply="child"
-        :isChild="true"
-        @reply="(id) => emit('reply', id)"
-      />
-    </div>
+    </v-expand-transition>
   </div>
 </template>
 
 <style scoped>
-.reply-item {
-  padding: 12px;
-  background-color: #fff;
-  border: 1px solid var(--border-color);
-  border-radius: 8px;
-}
-
-.child-item {
-  background-color: var(--bg-color);
+.reply-wrapper {
+  width: 100%;
 }
 
 .child-replies {
-  margin-left: 30px;
-  margin-top: 8px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.reply-meta {
-  font-size: 0.75em;
-  color: var(--text-muted);
-}
-
-.load-more-btn {
-  font-weight: bold;
+  border-left: 2px solid rgba(var(--v-border-color), 0.1);
 }
 </style>

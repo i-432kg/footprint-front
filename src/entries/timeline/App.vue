@@ -89,7 +89,7 @@ const submitPost = async () => {
 onMounted(async () => {
   try {
     const [userRes, postsRes] = await Promise.all([
-      axios.get('/api/me'),
+      axios.get('/api/users/me'),
       axios.get('/api/posts')
     ]);
     username.value = userRes.data.name;
@@ -101,180 +101,134 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="app-wrapper">
-    <!-- 共通ヘッダー（ナビゲーション） -->
+  <v-app>
     <TheHeader />
 
-    <div class="main-layout">
-      <!-- 左カラム: メインコンテンツ（タイムライン） -->
-      <main class="timeline-column">
-        <div class="timeline-header">
-          <h2>タイムライン</h2>
-          <!-- 表示形式の切り替えボタン -->
-          <div class="view-switcher">
-            <button :class="['switcher-btn', { active: viewMode === 'list' }]" @click="viewMode = 'list'">リスト</button>
-            <button :class="['switcher-btn', { active: viewMode === 'grid' }]" @click="viewMode = 'grid'">グリッド</button>
-          </div>
-        </div>
+    <v-main class="bg-grey-lighten-4">
+      <v-container class="py-6">
+        <v-row>
+          <!-- タイムライン -->
+          <v-col cols="12" md="8">
+            <v-card variant="flat" class="bg-transparent mb-4">
+              <v-row align="center" no-gutters>
+                <h2 class="text-h5 font-weight-bold">タイムライン</h2>
+                <v-spacer></v-spacer>
+                <!-- 表示形式切り替え -->
+                <v-btn-toggle v-model="viewMode" mandatory color="primary" density="compact" variant="outlined">
+                  <v-btn value="list" icon="mdi-view-list"></v-btn>
+                  <v-btn value="grid" icon="mdi-view-grid"></v-btn>
+                </v-btn-toggle>
+              </v-row>
+            </v-card>
 
-        <!-- 投稿がない場合の待機表示 -->
-        <div v-if="posts.length === 0" class="loading">投稿を読み込み中...</div>
+            <!-- 読み込み中表示 -->
+            <v-row v-if="posts.length === 0" justify="center" class="py-10">
+              <v-progress-circular indeterminate color="primary"></v-progress-circular>
+            </v-row>
 
-        <!-- 投稿一覧: viewMode に応じて表示切り替え -->
-        <div v-else :class="['post-container', `view-${viewMode}`]">
-          <article
-            v-for="post in posts"
-            :key="post.id"
-            class="post-card"
-            @click="openDetail(post)"
+            <!-- 投稿一覧 -->
+            <v-row v-else :dense="viewMode === 'grid'">
+              <v-col
+                v-for="post in posts"
+                :key="post.id"
+                :cols="viewMode === 'grid' ? 4 : 12"
+                :sm="viewMode === 'grid' ? 3 : 12"
+              >
+                <v-card
+                  :hover="true"
+                  @click="openDetail(post)"
+                  class="rounded-xl overflow-hidden"
+                  :variant="viewMode === 'grid' ? 'flat' : 'elevated'"
+                >
+                  <v-img
+                    v-if="post.imageUrl"
+                    :src="post.imageUrl"
+                    :aspect-ratio="viewMode === 'grid' ? 1 : undefined"
+                    cover
+                  ></v-img>
+
+                  <v-card-text v-if="viewMode === 'list'" class="d-flex align-center py-2">
+                    <v-icon size="small" color="primary" class="mr-1">mdi-map-marker</v-icon>
+                    <span class="text-caption" v-if="post.latitude">
+                      {{ post.latitude.toFixed(2) }}, {{ post.longitude.toFixed(2) }}
+                    </span>
+                    <v-spacer></v-spacer>
+                    <span class="text-caption text-medium-emphasis">{{ formatDate(post.createdAt) }}</span>
+                  </v-card-text>
+                </v-card>
+              </v-col>
+            </v-row>
+          </v-col>
+
+          <!-- サイドバー -->
+          <v-col cols="12" md="4" class="hidden-sm-and-down">
+            <v-card class="pa-4 rounded-xl mb-4" border flat>
+              <v-list-item class="px-0">
+                <template v-slot:prepend>
+                  <v-avatar color="primary">{{ username.charAt(0) }}</v-avatar>
+                </template>
+                <v-list-item-title class="font-weight-bold">こんにちは {{ username }} さん</v-list-item-title>
+              </v-list-item>
+              <v-btn
+                block
+                color="primary"
+                class="mt-4 rounded-pill"
+                size="large"
+                @click="showModal = true"
+              >
+                今どうしてる？
+              </v-btn>
+            </v-card>
+
+            <!-- おすすめエリア -->
+            <v-card class="pa-4 rounded-xl" border flat>
+              <h3 class="text-subtitle-1 font-weight-bold mb-2">おすすめ</h3>
+              <p class="text-caption text-medium-emphasis">準備中です...</p>
+            </v-card>
+          </v-col>
+        </v-row>
+      </v-container>
+    </v-main>
+
+    <!-- 新規投稿モーダル -->
+    <v-dialog v-model="showModal" max-width="500">
+      <v-card rounded="xl">
+        <v-card-title class="font-weight-bold">新規投稿</v-card-title>
+        <v-card-text>
+          <v-file-input
+            label="画像を選択（必須）"
+            accept="image/*"
+            prepend-icon="mdi-camera"
+            variant="filled"
+            @change="onFileChange"
+            hide-details
+            class="mb-4"
+          ></v-file-input>
+          <v-textarea
+            v-model="postContent"
+            placeholder="コメントを入力（任意）"
+            variant="filled"
+            rows="4"
+            hide-details
+          ></v-textarea>
+        </v-card-text>
+        <v-card-actions class="pa-4">
+          <v-btn variant="text" @click="showModal = false">キャンセル</v-btn>
+          <v-spacer></v-spacer>
+          <v-btn
+            color="primary"
+            variant="flat"
+            rounded="pill"
+            :disabled="isPostDisabled"
+            @click="submitPost"
           >
-            <!-- 投稿画像エリア -->
-            <div class="post-body">
-              <img v-if="post.imageUrl" :src="post.imageUrl" alt="投稿画像" class="post-image"/>
-            </div>
+            投稿する
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
 
-            <!-- リストモード時のみ表示する付加情報 -->
-            <div v-if="viewMode === 'list'" class="post-footer">
-              <span class="location" v-if="post.latitude">
-                📍 {{ post.latitude.toFixed(4) }}, {{ post.longitude.toFixed(4) }}
-              </span>
-              <span class="post-date">{{ formatDate(post.createdAt) }}</span>
-            </div>
-          </article>
-        </div>
-      </main>
-
-      <!-- 右カラム: ユーザープロフィール & アクション -->
-      <aside class="side-column">
-        <!-- ユーザー挨拶と投稿ボタン -->
-        <section class="user-card">
-          <p class="welcome-msg">こんにちは <strong>{{ username }}</strong> さん</p>
-          <button class="primary-btn" @click="showModal = true">今どうしてる？</button>
-        </section>
-
-        <!-- 拡張セクション -->
-        <section class="side-section">
-          <h3>未定コンテンツ</h3>
-          <div class="placeholder-text">おすすめとか</div>
-        </section>
-      </aside>
-    </div>
-
-    <!-- 投稿詳細モーダル: selectedPost に値があるときのみ描画 -->
+    <!-- 投稿詳細モーダル -->
     <PostDetailModal v-if="selectedPost" :post="selectedPost" @close="closeDetail" />
-
-    <!-- 新規投稿モーダル: overlay クリックで閉じるために .self 修飾子を使用 -->
-    <div v-if="showModal" class="modal-overlay" @click.self="showModal = false">
-      <div class="modal-window">
-        <h3>新規投稿</h3>
-        <div class="modal-file-input">
-          <label>画像を選択（必須）: </label>
-          <input type="file" accept="image/*" @change="onFileChange"/>
-        </div>
-        <textarea v-model="postContent" rows="4" placeholder="コメントを入力（任意）"></textarea>
-        <div class="modal-footer">
-          <button @click="showModal = false">キャンセル</button>
-          <button :disabled="isPostDisabled" @click="submitPost">投稿する</button>
-        </div>
-      </div>
-    </div>
-  </div>
+  </v-app>
 </template>
-
-<style scoped>
-.main-layout {
-  max-width: 1200px;
-  margin: 0 auto;
-  display: grid;
-  grid-template-columns: 1fr 320px;
-  gap: 24px;
-  padding: 24px 20px;
-}
-.view-switcher button.active {
-  background: var(--primary-color);
-  color: white;
-  border-color: var(--primary-color);
-}
-.post-card {
-  background: white;
-  border-radius: 12px;
-  border: 1px solid var(--border-color);
-  cursor: pointer;
-}
-.user-card {
-  background: white;
-  padding: 20px;
-  border-radius: 12px;
-  border: 1px solid var(--border-color);
-  text-align: center;
-}
-
-.timeline-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 20px;
-}
-
-/* スイッチャーボタンのスタイル調整 */
-.view-switcher {
-  display: flex;
-  border-radius: 8px;
-  overflow: hidden;
-  border: 1px solid var(--border-color);
-}
-
-.switcher-btn {
-  padding: 8px 16px;
-  border: none;
-  background: white;
-  color: var(--text-main);
-  font-size: 0.9rem;
-}
-
-.switcher-btn.active {
-  background: var(--primary-color);
-  color: white;
-}
-
-/* グリッド表示を復活させるための最重要設定 */
-.post-container.view-grid {
-  display: grid;
-  /* 最小 150px、最大 1fr で画面幅に合わせて並べる */
-  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-  gap: 8px; /* グリッド間の隙間 */
-}
-
-/* グリッド時の画像アスペクト比固定 */
-.view-grid .post-card {
-  padding: 0; /* 余計なパディングを削除 */
-  border: none;
-  border-radius: 4px;
-}
-
-.view-grid .post-image {
-  width: 100%;
-  aspect-ratio: 1 / 1;
-  object-fit: cover;
-  display: block;
-}
-
-/* リスト表示時のスタイル */
-.post-container.view-list {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
-.view-list .post-card {
-  padding: 16px;
-  background: white;
-  border: 1px solid var(--border-color);
-  border-radius: 12px;
-}
-
-.view-list .post-image {
-  max-width: 100%;
-  border-radius: 8px;
-}
-</style>

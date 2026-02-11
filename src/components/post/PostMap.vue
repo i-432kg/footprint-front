@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted, ref, render, h } from 'vue';
+import { onMounted, ref, render, h, getCurrentInstance} from 'vue';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import axios from 'axios';
@@ -45,6 +45,9 @@ const fetchPosts = async () => {
   }
 };
 
+// 現在の Vue アプリのインスタンスを取得
+const { appContext } = getCurrentInstance();
+
 const renderMarkers = () => {
   if (!map.value) return;
 
@@ -54,13 +57,13 @@ const renderMarkers = () => {
       const marker = L.marker([post.latitude, post.longitude], { icon: customIcon })
         .addTo(map.value);
 
+      // Leaflet内部でPostPopupを利用するための設定
       const container = document.createElement('div');
-
-      // Vue コンポーネントを VNode に変換し、div にレンダリング
       const vnode = h(PostPopup, {
         post,
         onShowDetail: (clickedPost) => openDetail(clickedPost)
       });
+      vnode.appContext = appContext;
       render(vnode, container);
 
       marker.bindPopup(container, {
@@ -89,28 +92,35 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="map-wrapper">
+  <v-sheet class="map-wrapper fill-height bg-grey-lighten-3">
+    <!-- 投稿マップ -->
     <div ref="mapContainer" class="leaflet-map"></div>
-    <!--  投稿詳細モーダル  -->
+
+    <!-- 投稿詳細モーダル -->
     <PostDetailModal
       v-if="isModalOpen"
       :post="selectedPost"
       @close="isModalOpen = false"
     />
-  </div>
+  </v-sheet>
 </template>
 
 <style scoped>
 .map-wrapper {
   width: 100%;
-  height: 500px;
-  border: 1px solid #ddd;
-  border-radius: 8px;
+  position: relative;
   overflow: hidden;
+  min-height: 500px;
 }
 
 .leaflet-map {
   width: 100%;
   height: 100%;
+  z-index: 1;
+}
+
+/* モーダルが地図の背面に隠れないように z-index を調整 */
+:deep(.v-overlay) {
+  z-index: 2000;
 }
 </style>

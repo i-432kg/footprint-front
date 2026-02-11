@@ -35,6 +35,10 @@ const showReplyModal = ref(false);
  */
 const selectedParentReplyId = ref(null);
 
+/** モーダルの開閉状態を管理する */
+const dialog = ref(true);
+
+
 /**
  * 返信入力モーダルを開く
  *
@@ -86,6 +90,10 @@ const closeModal = () => {
   emit('close');
 };
 
+/** モーダル外側をクリックした時などのイベント監視 */
+const updateDialog = (val) => {
+  if (!val) closeModal();
+};
 
 /**
  * 初期表示時の処理
@@ -100,27 +108,50 @@ onMounted(async () => {
 </script>
 
 <template>
-  <!-- モーダル外クリックで閉じる -->
-  <div class="modal-overlay" @click.self="closeModal">
-    <div class="modal-window detail-window">
-      <div class="modal-header">
-        <h3>投稿詳細</h3>
-        <span v-if="isLoading" class="loading-badge">更新中...</span>
-      </div>
+  <v-dialog
+    v-model="dialog"
+    max-width="600"
+    scrollable
+    @update:model-value="updateDialog"
+  >
+    <v-card rounded="xl">
+      <!-- ヘッダー -->
+      <v-card-title class="d-flex align-center justify-space-between pa-4">
+        <span class="text-h6 font-weight-bold">投稿詳細</span>
+        <v-chip v-if="isLoading" size="small" color="primary" variant="tonal">更新中...</v-chip>
+      </v-card-title>
 
-      <div class="detail-content">
-        <!-- 投稿の表示（画像/本文/緯度経度/日付/投稿への返信ボタン） -->
-        <PostDetailContent :post="detailedPost" @reply="openReplyModal(null)" />
+      <v-divider></v-divider>
 
-        <!-- 親返信一覧 -->
-        <CommentThread :replies="replyStore.topLevelReplies" @reply="openReplyModal" />
-      </div>
+      <!-- コンテンツ部分 -->
+      <v-card-text class="pa-0">
+        <v-container class="pa-4">
+          <!-- 投稿本体 -->
+          <PostDetailContent :post="detailedPost" @reply="openReplyModal(null)" />
 
-      <div class="modal-footer">
-        <button class="btn-text" @click="closeModal">閉じる</button>
-      </div>
-    </div>
-  </div>
+          <v-divider class="my-4"></v-divider>
+
+          <!-- 返信一覧 -->
+          <CommentThread :replies="replyStore.topLevelReplies" @reply="openReplyModal" />
+        </v-container>
+      </v-card-text>
+
+      <v-divider></v-divider>
+
+      <!-- フッター -->
+      <v-card-actions class="pa-4">
+        <v-spacer></v-spacer>
+        <v-btn
+          color="grey-darken-1"
+          variant="text"
+          rounded="pill"
+          @click="closeModal"
+        >
+          閉じる
+        </v-btn>
+      </v-card-actions>
+    </v-card>
+  </v-dialog>
 
   <!-- 返信入力モーダル -->
   <ReplyModal
@@ -133,17 +164,5 @@ onMounted(async () => {
 </template>
 
 <style scoped>
-/* 投稿詳細モーダルの見た目 */
-.detail-window {
-  width: 600px;
-}
 
-/* 「更新中...」表示 */
-.loading-badge {
-  font-size: 0.75em;
-  color: var(--primary-color);
-  background: #e8f5fd;
-  padding: 2px 8px;
-  border-radius: 10px;
-}
 </style>
