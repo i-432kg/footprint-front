@@ -1,12 +1,12 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import axios from 'axios';
-import TwoColumnLayout from '@/components/layout/TwoColumnLayout.vue';
-import SideProfile from '@/components/layout/SideProfile.vue';
+
+import SideUserActions from '@/components/layout/SideUserActions.vue';
 import SideSearchOption from "@/components/layout/SideSearchOption.vue";
-import NewPostModal from '@/components/post/NewPostModal.vue';
-import PostDetailModal from '@/components/post/detail/PostDetailModal.vue';
+import TwoColumnLayout from '@/components/layout/TwoColumnLayout.vue';
 import SearchResultItem from '@/components/post/SearchResultItem.vue';
+import PostDetailModal from '@/components/post/detail/PostDetailModal.vue';
 
 // 無限スクロール用
 const posts = ref([]);
@@ -16,9 +16,8 @@ const observerTarget = ref(null);
 const lastId = ref(null);
 const selectedPost = ref(null);
 
-// ユーザー情報・投稿用
+// ユーザー情報
 const username = ref('ゲスト');
-const showModal = ref(false);
 
 // URLから検索クエリを取得
 const urlParams = new URLSearchParams(window.location.search);
@@ -99,13 +98,12 @@ onMounted(async () => {
 
     <!-- サイドバー -->
     <template #sidebar>
-      <SideProfile :username="username" @click-post="showModal = true" />
+      <SideUserActions :username="username" />
       <SideSearchOption />
     </template>
 
     <!-- モーダル類 -->
     <template #modals>
-      <NewPostModal v-model="showModal" />
       <PostDetailModal v-if="selectedPost" :post="selectedPost" @close="closeDetail" />
     </template>
   </TwoColumnLayout>

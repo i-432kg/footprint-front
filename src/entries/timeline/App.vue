@@ -1,11 +1,10 @@
 <script setup>
-import { ref, onMounted, computed } from 'vue';
+import { ref, onMounted } from 'vue';
 import axios from 'axios';
 
-import TwoColumnLayout from '@/components/layout/TwoColumnLayout.vue';
-import SideProfile from "@/components/layout/SideProfile.vue";
+import SideUserActions from '@/components/layout/SideUserActions.vue';
 import SideRecommendation from "@/components/layout/SideRecommendation.vue";
-import NewPostModal from '@/components/post/NewPostModal.vue';
+import TwoColumnLayout from '@/components/layout/TwoColumnLayout.vue';
 import PostCard from '@/components/post/PostCard.vue';
 import PostDetailModal from '@/components/post/detail/PostDetailModal.vue';
 
@@ -26,9 +25,6 @@ const username = ref('ゲスト');
 
 /** 投稿詳細モーダルで表示するために選択された投稿オブジェクト */
 const selectedPost = ref(null);
-
-/** 新規投稿モーダルの表示フラグ */
-const showModal = ref(false);
 
 /**
  * タイムラインの表示形式
@@ -106,13 +102,12 @@ onMounted(async () => {
 
     <!-- サイドバー -->
     <template #sidebar>
-      <SideProfile :username="username" @click-post="showModal = true" />
+      <SideUserActions :username="username" @submitted="refreshPosts" />
       <SideRecommendation />
     </template>
 
     <!-- モーダル類 -->
     <template #modals>
-      <NewPostModal v-model="showModal" @submitted="refreshPosts" />
       <PostDetailModal v-if="selectedPost" :post="selectedPost" @close="closeDetail" />
     </template>
   </TwoColumnLayout>
