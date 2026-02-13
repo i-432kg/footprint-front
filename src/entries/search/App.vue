@@ -5,8 +5,8 @@ import TwoColumnLayout from '@/components/layout/TwoColumnLayout.vue';
 import SideProfile from '@/components/layout/SideProfile.vue';
 import SideSearchOption from "@/components/layout/SideSearchOption.vue";
 import NewPostModal from '@/components/post/NewPostModal.vue';
-import PostDetailModal from '@/components/post/PostDetailModal.vue';
-import SearchResultItem from '@/components/SearchResultItem.vue';
+import PostDetailModal from '@/components/post/detail/PostDetailModal.vue';
+import SearchResultItem from '@/components/post/SearchResultItem.vue';
 
 // 無限スクロール用
 const posts = ref([]);

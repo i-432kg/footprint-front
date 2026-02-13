@@ -3,7 +3,7 @@ import { ref, onMounted } from 'vue';
 import axios from 'axios';
 
 import TheHeader from '@/components/layout/Header.vue';
-import PostDetailModal from '@/components/post/PostDetailModal.vue';
+import PostDetailModal from '@/components/post/detail/PostDetailModal.vue';
 import { useDateFormatter } from "@/composables/useDateFormatter.js";
 
 const { formatDate } = useDateFormatter();

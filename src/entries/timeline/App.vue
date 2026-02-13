@@ -6,8 +6,8 @@ import TwoColumnLayout from '@/components/layout/TwoColumnLayout.vue';
 import SideProfile from "@/components/layout/SideProfile.vue";
 import SideRecommendation from "@/components/layout/SideRecommendation.vue";
 import NewPostModal from '@/components/post/NewPostModal.vue';
-import PostCard from '@/components/PostCard.vue';
-import PostDetailModal from '@/components/post/PostDetailModal.vue';
+import PostCard from '@/components/post/PostCard.vue';
+import PostDetailModal from '@/components/post/detail/PostDetailModal.vue';
 
 /**
  * タイムライン画面（メインエントリーポイント）

@@ -4,7 +4,7 @@ import { onMounted, ref } from "vue";
 import ReplyModal from "./ReplyModal.vue";
 import PostDetailContent from "./PostDetailContent.vue";
 import CommentThread from "./CommentThread.vue";
-import { useReplyStore } from '@/stores/replyStore';
+import { useReplyStore } from '@/stores/replyStore.js';
 
 const replyStore = useReplyStore();
 

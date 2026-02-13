@@ -4,7 +4,7 @@ import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import axios from 'axios';
 import PostPopup from './PostPopup.vue';
-import PostDetailModal from './PostDetailModal.vue';
+import PostDetailModal from './detail/PostDetailModal.vue';
 
 // 404エラー対策 new URL として読み込む
 const markerIcon = new URL('leaflet/dist/images/marker-icon.png', import.meta.url).href;
