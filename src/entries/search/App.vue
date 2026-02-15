@@ -1,6 +1,7 @@
 <script setup>
 import { ref, onMounted } from 'vue';
-import axios from 'axios';
+import postService from "@/services/postService.js";
+import userService from "@/services/userService.js";
 
 import SideUserActions from '@/components/layout/SideUserActions.vue';
 import SideSearchOption from "@/components/layout/SideSearchOption.vue";
@@ -31,10 +32,7 @@ const fetchSearchResults = async () => {
   if (isLoading.value || !hasMore.value || !query.value) return;
   isLoading.value = true;
   try {
-    const res = await axios.get('/api/posts/search', {
-      params: { keyword: query.value, lastId: lastId.value, size: 10 }
-    });
-    const newPosts = res.data;
+    const newPosts = await postService.search(query.value, lastId.value);
     if (newPosts.length === 0) {
       hasMore.value = false;
     } else {
@@ -52,8 +50,8 @@ const fetchSearchResults = async () => {
 onMounted(async () => {
 
   try {
-    const userRes = await axios.get('/api/users/me');
-    username.value = userRes.data.name;
+    const userData = await userService.getMe();
+    username.value = userData.name;
   } catch (e) { console.error(e); }
 
   await fetchSearchResults();

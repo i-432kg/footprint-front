@@ -2,7 +2,8 @@
 import { onMounted, ref, render, h, getCurrentInstance} from 'vue';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
-import axios from 'axios';
+import postService from "@/services/postService.js";
+
 import PostPopup from './PostPopup.vue';
 import PostDetailModal from './detail/PostDetailModal.vue';
 
@@ -35,8 +36,7 @@ const openDetail = (post) => {
 
 const fetchPosts = async () => {
   try {
-    const response = await axios.get('/api/posts');
-    posts.value = response.data;
+    posts.value = await postService.fetchTimeline();
 
     // 取得した投稿を地図に描画
     renderMarkers();

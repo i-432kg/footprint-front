@@ -1,6 +1,6 @@
 <script setup>
 import { ref, reactive } from 'vue';
-import axios from 'axios';
+import userService from '@/services/userService';
 
 /**
  * ログインフォーム
@@ -16,11 +16,7 @@ const handleLogin = async () => {
   if (isLoggingIn.value) return;
   isLoggingIn.value = true;
   try {
-    const params = new URLSearchParams();
-    params.append('loginId', loginForm.loginId);
-    params.append('password', loginForm.password);
-
-    await axios.post('/api/login', params);
+    await userService.login(loginForm.loginId, loginForm.password);
 
     // ログイン成功時はタイムラインへ
     window.location.href = '/timeline';

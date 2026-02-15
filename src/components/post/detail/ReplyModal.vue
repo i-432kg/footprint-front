@@ -1,6 +1,6 @@
 <script setup>
 import { ref, computed } from 'vue';
-import axios from 'axios';
+import postService from '@/services/postService';
 
 /**
  * - postId: どの投稿に紐づく返信か
@@ -40,10 +40,12 @@ const submitReply = async () => {
 
   isSubmitting.value = true;
   try {
-    await axios.post(`/api/post/${props.postId}/reply`, {
-      content: replyContent.value,
-      parentReplyId: props.parentReplyId
-    });
+
+    await postService.createReply(
+      props.postId,
+      replyContent.value,
+      props.parentReplyId
+    );
 
     // 送信成功時に入力欄をクリア
     replyContent.value = '';

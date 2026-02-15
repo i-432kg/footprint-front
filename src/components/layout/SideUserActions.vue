@@ -1,6 +1,6 @@
 <script setup>
 import { ref, computed } from 'vue';
-import axios from 'axios';
+import postService from '@/services/postService';
 
 /**
  * 共通2カラムレイアウト用：ユーザアクションカード
@@ -33,9 +33,7 @@ const submitPost = async () => {
     formData.append('comment', postContent.value || '');
     formData.append('imageFile', selectedFile.value);
 
-    await axios.post('/api/post', formData, {
-      headers: { 'Content-Type': 'multipart/form-data' }
-    });
+    await postService.createPost(formData);
 
     postContent.value = '';
     selectedFile.value = null;

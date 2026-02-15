@@ -1,6 +1,6 @@
 import { ref } from 'vue'
 import { defineStore } from 'pinia'
-import axios from 'axios'
+import postService from '@/services/postService'
 
 /**
  * 返信（コメント）関連の状態管理ストア
@@ -39,8 +39,7 @@ export const useReplyStore = defineStore('reply', () => {
    * - 親返信を投稿したあと
    */
   async function fetchTopLevelReplies(postId) {
-    const res = await axios.get(`/api/post/${postId}/replies`)
-    topLevelReplies.value = res.data
+    topLevelReplies.value = await postService.fetchReplies(postId);
   }
 
   /**
@@ -49,14 +48,14 @@ export const useReplyStore = defineStore('reply', () => {
    * - 子返信を投稿したあと、その階層だけ再取得して反映する
    */
   async function fetchChildReplies(parentReplyId) {
-    const res = await axios.get(`/api/reply/${parentReplyId}/replies`)
+    const data = await postService.fetchChildReplies(parentReplyId);
 
     childRepliesMap.value = {
       ...childRepliesMap.value,
-      [parentReplyId]: res.data,
+      [parentReplyId]: data,
     }
 
-    return res.data
+    return data;
   }
 
   /**

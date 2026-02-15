@@ -1,6 +1,7 @@
 <script setup>
 import { ref, onMounted } from 'vue';
-import axios from 'axios';
+import postService from "@/services/postService.js";
+import userService from '@/services/userService';
 
 import SideUserActions from '@/components/layout/SideUserActions.vue';
 import SideRecommendation from "@/components/layout/SideRecommendation.vue";
@@ -47,19 +48,20 @@ const closeDetail = () => { selectedPost.value = null; };
  * @returns {Promise<void>}
  */
 const refreshPosts = async () => {
-  const res = await axios.get('/api/posts');
-  posts.value = res.data;
+  posts.value = await postService.fetchTimeline();
 };
 
 /** 初期表示時 */
 onMounted(async () => {
   try {
-    const [userRes, postsRes] = await Promise.all([
-      axios.get('/api/users/me'),
-      axios.get('/api/posts')
+    const [userData, timelinePosts] = await Promise.all([
+      userService.getMe(),
+      postService.fetchTimeline()
     ]);
-    username.value = userRes.data.name;
-    posts.value = postsRes.data;
+
+    username.value = userData.name;
+    posts.value = timelinePosts;
+
   } catch (error) {
     console.error('データの取得に失敗しました:', error);
   }

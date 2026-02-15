@@ -1,6 +1,6 @@
 <script setup>
 import { ref, reactive } from 'vue';
-import axios from 'axios';
+import userService from "@/services/userService.js";
 
 /**
  * 新規登録モーダル
@@ -31,7 +31,7 @@ const handleRegister = async () => {
   if (isRegistering.value) return;
   isRegistering.value = true;
   try {
-    await axios.post('/api/signup', registerForm);
+    await userService.signup(registerForm);
     emit('registered');
     closeModal();
   } catch (error) {

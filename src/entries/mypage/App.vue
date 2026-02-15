@@ -1,10 +1,10 @@
 <script setup>
 import { ref, onMounted } from 'vue';
-import axios from 'axios';
+import { useDateFormatter } from "@/composables/useDateFormatter.js";
+import userService from "@/services/userService.js";
 
 import TheHeader from '@/components/layout/Header.vue';
 import PostDetailModal from '@/components/post/detail/PostDetailModal.vue';
-import { useDateFormatter } from "@/composables/useDateFormatter.js";
 
 const { formatDate } = useDateFormatter();
 
@@ -31,19 +31,22 @@ const closeDetail = () => { selectedPost.value = null; };
 
 onMounted(async () => {
   try {
-    const [userRes, postsRes, commentsRes] = await Promise.all([
-      axios.get('/api/users/me'),
-      axios.get('/api/users/me/posts'),
-      axios.get('/api/users/me/replies')
+
+    const [userData, posts, replies] = await Promise.all([
+      userService.getMe(),
+      userService.getMyPosts(),
+      userService.getMyReplies()
     ]);
 
     user.value = {
-      name: userRes.data.name,
-      postCount: postsRes.data.length,
-      commentCount: commentsRes.data.length
+      name: userData.name,
+      postCount: posts.length,
+      commentCount: replies.length
     };
-    myPosts.value = postsRes.data;
-    myComments.value = commentsRes.data;
+
+    myPosts.value = posts;
+    myComments.value = replies;
+
   } catch (error) {
     console.error('データの取得に失敗しました:', error);
   }

@@ -1,10 +1,11 @@
 <script setup>
-import axios from "axios";
 import { onMounted, ref } from "vue";
+import { useReplyStore } from '@/stores/replyStore.js';
+import postService from '@/services/postService.js';
+
 import ReplyModal from "./ReplyModal.vue";
 import PostDetailContent from "./PostDetailContent.vue";
 import CommentThread from "./CommentThread.vue";
-import { useReplyStore } from '@/stores/replyStore.js';
 
 const replyStore = useReplyStore();
 
@@ -54,8 +55,7 @@ const openReplyModal = (replyId = null) => {
  */
 const fetchPostDetail = async () => {
   try {
-    const postRes = await axios.get(`/api/post/${props.post.id}`);
-    detailedPost.value = postRes.data;
+    detailedPost.value = await postService.fetchDetail(props.post.id);
   } catch (error) {
     console.error('データの取得に失敗しました:', error);
   } finally {
