@@ -35,7 +35,7 @@ onMounted( () => {
   <TwoColumnLayout>
     <!-- メインヘッダーエリア -->
     <template #header>
-      <h2 class="text-h5 font-weight-bold">「{{ query }}」の検索結果</h2>
+      <h2 class="text-h5 font-weight-bold mb-6">「{{ query }}」の検索結果</h2>
     </template>
 
     <!-- メインコンテンツ -->

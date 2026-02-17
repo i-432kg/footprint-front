@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 import { useInfiniteScroll } from '@/composables/useInfiniteScroll';
 import postService from "@/services/postService.js";
 
@@ -27,6 +27,9 @@ const selectedPost = ref(null);
  * 'grid': 画像をタイル状に並べて表示（ギャラリー風）
  */
 const viewMode = ref('list');
+
+/** グリッド表示時は余白を詰める */
+const isDense = computed(() => viewMode.value === 'grid');
 
 // --- 関数 (Methods) ---
 
@@ -65,7 +68,7 @@ const refreshPosts = () => {
   <TwoColumnLayout>
     <!-- メインヘッダーエリア -->
     <template #header>
-      <v-card variant="flat" class="bg-transparent">
+      <v-card variant="flat" class="bg-transparent mb-6">
         <v-row align="center" no-gutters>
           <h2 class="text-h5 font-weight-bold">タイムライン</h2>
           <v-spacer></v-spacer>
@@ -80,12 +83,12 @@ const refreshPosts = () => {
     <!-- メインコンテンツ -->
     <template #main>
       <!-- 投稿リスト -->
-      <v-row :dense="viewMode === 'grid'">
+      <v-row :dense="isDense">
         <v-col
           v-for="post in posts"
           :key="post.id"
-          :cols="viewMode === 'grid' ? 4 : 12"
-          :sm="viewMode === 'grid' ? 3 : 12"
+          :cols="isDense ? 4 : 12"
+          :sm="isDense ? 3 : 12"
         >
           <PostCard :post="post" :viewMode="viewMode" @click="openDetail" />
         </v-col>
