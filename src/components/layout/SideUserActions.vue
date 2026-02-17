@@ -1,17 +1,16 @@
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 import postService from '@/services/postService';
+import userService from "@/services/userService.js";
 
 /**
  * 共通2カラムレイアウト用：ユーザアクションカード
  */
-const props = defineProps({
-  username: { type: String, required: true }
-});
 
 const emit = defineEmits(['submitted']);
 
 // ユーザー情報・投稿用
+const username = ref('ゲスト');
 const showModal = ref(false);
 const postContent = ref('');
 const selectedFile = ref(null);
@@ -46,6 +45,18 @@ const submitPost = async () => {
     isSubmitting.value = false;
   }
 };
+
+/** ユーザー情報の取得 */
+onMounted(async () => {
+  try {
+    const userData = await userService.getMe();
+    if (userData && userData.name) {
+      username.value = userData.name;
+    }
+  } catch (error) {
+    console.error('ユーザー情報の取得に失敗しました:', error);
+  }
+});
 </script>
 
 <template>

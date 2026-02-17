@@ -2,23 +2,23 @@ import apiClient from './apiClient';
 
 export default {
   /** 一覧取得（タイムライン用） */
-  fetchTimeline() {
-    return apiClient.get('/api/posts');
+  fetchTimeline(lastId, size) {
+    return apiClient.get('/api/posts', { params: {lastId, size } });
   },
 
   /** 検索実行 */
-  search(keyword, lastId, size = 10) {
+  search(keyword, lastId, size) {
     return apiClient.get('/api/posts/search', { params: { keyword, lastId, size } });
   },
 
   /** 投稿詳細取得 */
   fetchDetail(postId) {
-    return apiClient.get(`/api/post/${postId}`);
+    return apiClient.get(`/api/posts/${postId}`);
   },
 
   /** 新規投稿 */
   createPost(formData) {
-    return apiClient.post('/api/post', formData, {
+    return apiClient.post('/api/posts', formData, {
       headers: { 'Content-Type': 'multipart/form-data' }
     });
   },

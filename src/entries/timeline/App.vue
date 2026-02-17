@@ -1,7 +1,7 @@
 <script setup>
 import { ref, onMounted } from 'vue';
+import { useInfiniteScroll } from '@/composables/useInfiniteScroll';
 import postService from "@/services/postService.js";
-import userService from '@/services/userService';
 
 import SideUserActions from '@/components/layout/SideUserActions.vue';
 import SideRecommendation from "@/components/layout/SideRecommendation.vue";
@@ -17,12 +17,6 @@ import PostDetailModal from '@/components/post/detail/PostDetailModal.vue';
  * - ユーザー情報の表示と新規投稿への導線（右サイドバー）
  * - 各種モーダル（新規投稿・投稿詳細）の制御
  */
-
-/** サーバーから取得した投稿データの配列 */
-const posts = ref([]);
-
-/** ログイン中のユーザー名（右サイドバー表示用） */
-const username = ref('ゲスト');
 
 /** 投稿詳細モーダルで表示するために選択された投稿オブジェクト */
 const selectedPost = ref(null);
@@ -42,30 +36,29 @@ const openDetail = (post) => { selectedPost.value = post; };
 /** 投稿詳細モーダルを閉じる */
 const closeDetail = () => { selectedPost.value = null; };
 
-/**
- * 投稿一覧を再取得する
- *
- * @returns {Promise<void>}
- */
-const refreshPosts = async () => {
-  posts.value = await postService.fetchTimeline();
-};
+const scrollObserver = ref(null);
 
-/** 初期表示時 */
-onMounted(async () => {
-  try {
-    const [userData, timelinePosts] = await Promise.all([
-      userService.getMe(),
-      postService.fetchTimeline()
-    ]);
+/** 無限スクロールロジック */
+const { items: posts, isLoading, hasMore, observe, reset } =
+  useInfiniteScroll(async (lastId, pageSize) => {
+    return await postService.fetchTimeline(lastId, pageSize);
+  }, { pageSize: 10 });
 
-    username.value = userData.name;
-    posts.value = timelinePosts;
-
-  } catch (error) {
-    console.error('データの取得に失敗しました:', error);
-  }
+/** 初期表示 */
+onMounted(() => {
+  // 監視を開始するだけで、Composable内の IntersectionObserver が
+  // 自動的に初回(lastId=null)の読み込みをトリガーします。
+  observe(scrollObserver.value);
 });
+
+/**
+ * 再取得処理（投稿成功時など）
+ * Composable の reset() を呼ぶだけで、リストが空になり
+ * 自動的に最新の1ページ目が読み込まれます。
+ */
+const refreshPosts = () => {
+  reset();
+};
 </script>
 
 <template>
@@ -86,11 +79,8 @@ onMounted(async () => {
 
     <!-- メインコンテンツ -->
     <template #main>
-      <v-row v-if="posts.length === 0" justify="center" class="py-10">
-        <v-progress-circular indeterminate color="primary"></v-progress-circular>
-      </v-row>
-
-      <v-row v-else :dense="viewMode === 'grid'">
+      <!-- 投稿リスト -->
+      <v-row :dense="viewMode === 'grid'">
         <v-col
           v-for="post in posts"
           :key="post.id"
@@ -100,11 +90,19 @@ onMounted(async () => {
           <PostCard :post="post" :viewMode="viewMode" @click="openDetail" />
         </v-col>
       </v-row>
+
+      <!-- 監視用の目印 ＆ ローダー -->
+      <div ref="scrollObserver" class="text-center py-10">
+        <v-progress-circular v-if="isLoading" indeterminate color="primary"></v-progress-circular>
+        <p v-else-if="!hasMore && posts.length > 0" class="text-caption text-medium-emphasis">
+          すべての投稿を表示しました
+        </p>
+      </div>
     </template>
 
     <!-- サイドバー -->
     <template #sidebar>
-      <SideUserActions :username="username" @submitted="refreshPosts" />
+      <SideUserActions @submitted="refreshPosts" />
       <SideRecommendation />
     </template>
 
