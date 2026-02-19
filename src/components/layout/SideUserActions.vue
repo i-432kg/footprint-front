@@ -1,7 +1,7 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue';
+import { useUserStore } from '@/stores/userStore';
 import postService from '@/services/postService';
-import userService from "@/services/userService.js";
 
 /**
  * サイドバー：ユーザーアクションコンポーネント
@@ -15,8 +15,10 @@ import userService from "@/services/userService.js";
 /** @event submitted - 投稿成功時に発火（親コンポーネントでのリスト更新用） */
 const emit = defineEmits(['submitted']);
 
+const userStore = useUserStore();
+
 /** ログイン中のユーザー名 */
-const username = ref('ゲスト');
+const username = computed(() => userStore.username);
 
 /** 新規投稿モーダルの表示フラグ */
 const showModal = ref(false);
@@ -102,20 +104,6 @@ const closeModal = () => {
   selectedFile.value = null;
   clearPreview();
 };
-
-/**
- * 初期化処理：ログインユーザー情報を取得する
- */
-onMounted(async () => {
-  try {
-    const userData = await userService.getMe();
-    if (userData && userData.name) {
-      username.value = userData.name;
-    }
-  } catch (error) {
-    console.error('ユーザー情報の取得に失敗しました:', error);
-  }
-});
 </script>
 
 <template>
