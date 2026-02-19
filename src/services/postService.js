@@ -17,10 +17,12 @@ export default {
   },
 
   /** 新規投稿 */
-  createPost(formData) {
-    return apiClient.post('/api/posts', formData, {
-      headers: { 'Content-Type': 'multipart/form-data' }
-    });
+  createPost({ comment, imageFile }) {
+    const formData = new FormData();
+    formData.append('comment', comment || '');
+    formData.append('imageFile', imageFile);
+
+    return apiClient.post('/api/posts', formData);
   },
 
   /** 返信（コメント）投稿 */

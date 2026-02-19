@@ -4,40 +4,87 @@ import postService from '@/services/postService';
 import userService from "@/services/userService.js";
 
 /**
- * 共通2カラムレイアウト用：ユーザアクションカード
+ * サイドバー：ユーザーアクションコンポーネント
+ *
+ * 役割:
+ * - ログインユーザー情報の表示
+ * - 新規投稿モーダルの提供（画像選択・コメント入力）
+ * - 投稿データの送信制御
  */
 
+/** @event submitted - 投稿成功時に発火（親コンポーネントでのリスト更新用） */
 const emit = defineEmits(['submitted']);
 
-// ユーザー情報・投稿用
+/** ログイン中のユーザー名 */
 const username = ref('ゲスト');
+
+/** 新規投稿モーダルの表示フラグ */
 const showModal = ref(false);
+
+/** 投稿コメントの入力値 */
 const postContent = ref('');
+
+/** 選択された画像ファイル */
 const selectedFile = ref(null);
+
+/** 選択された画像のプレビュー用URL */
+const previewUrl = ref(null);
+
+/** 投稿処理の実行中フラグ */
 const isSubmitting = ref(false);
 
+/** 投稿ボタンの無効化判定 */
 const isPostDisabled = computed(() => !selectedFile.value || isSubmitting.value);
 
-const onFileChange = (e) => {
-  const files = e.target.files;
-  if (files.length > 0) selectedFile.value = files[0];
+/**
+ * ファイル選択時のハンドリング
+ * プレビューURLの生成と古いURLの破棄を行う
+ *
+ * @param {Event} event - input[type="file"] の change イベント
+ */
+const onFileChange = (event) => {
+
+  // 古いプレビュー情報を破棄
+  clearPreview();
+
+  const files = event.target.files;
+  if (files && files.length > 0) {
+    selectedFile.value = files[0];
+
+    // 画像プレビューを作成
+    previewUrl.value = URL.createObjectURL(files[0]);
+  } else {
+    selectedFile.value = null;
+  }
 };
 
-/** 新規投稿送信 */
+/** プレビューURLの解放 */
+const clearPreview = () => {
+  if (previewUrl.value) {
+    URL.revokeObjectURL(previewUrl.value);
+    previewUrl.value = null;
+  }
+};
+
+/**
+ * 新規投稿を送信する
+ * 成功時はモーダルを閉じ、入力をリセットする
+ *
+ * @async
+ * @returns {Promise<void>}
+ */
 const submitPost = async () => {
   if (!selectedFile.value) return;
+
   isSubmitting.value = true;
   try {
-    const formData = new FormData();
-    formData.append('comment', postContent.value || '');
-    formData.append('imageFile', selectedFile.value);
+    await postService.createPost({
+      comment: postContent.value,
+      imageFile: selectedFile.value
+    });
 
-    await postService.createPost(formData);
-
-    postContent.value = '';
-    selectedFile.value = null;
-    showModal.value = false;
-    emit('submitted'); // 投稿成功を親に通知（一覧更新用）
+    closeModal();
+    emit('submitted'); // 投稿成功を親に通知
   } catch (error) {
     console.error('投稿失敗:', error);
     alert('投稿に失敗しました。');
@@ -46,7 +93,19 @@ const submitPost = async () => {
   }
 };
 
-/** ユーザー情報の取得 */
+/**
+ * モーダルを閉じ、入力フォームとプレビューの状態をリセットする
+ */
+const closeModal = () => {
+  showModal.value = false;
+  postContent.value = '';
+  selectedFile.value = null;
+  clearPreview();
+};
+
+/**
+ * 初期化処理：ログインユーザー情報を取得する
+ */
 onMounted(async () => {
   try {
     const userData = await userService.getMe();
@@ -85,16 +144,33 @@ onMounted(async () => {
       <v-card-title class="font-weight-bold pa-4">新規投稿</v-card-title>
       <v-divider></v-divider>
       <v-card-text class="pa-4">
+        <!-- 画像選択エリア -->
         <v-file-input
+          v-model="selectedFile"
           label="画像を選択（必須）"
           accept="image/*"
           prepend-icon="mdi-camera"
           variant="filled"
           rounded="lg"
           @change="onFileChange"
+          @click:clear="onFileChange({ target: { files: [] } })"
           hide-details
           class="mb-4"
         ></v-file-input>
+
+        <!-- 画像プレビュー表示エリア -->
+        <v-expand-transition>
+          <div v-if="previewUrl" class="mb-4">
+            <v-img
+              :src="previewUrl"
+              class="rounded-lg bg-grey-lighten-2"
+              max-height="300"
+              cover
+            ></v-img>
+          </div>
+        </v-expand-transition>
+
+        <!-- コメント入力エリア -->
         <v-textarea
           v-model="postContent"
           placeholder="コメントを入力（任意）"
@@ -104,6 +180,8 @@ onMounted(async () => {
           hide-details
         ></v-textarea>
       </v-card-text>
+
+      <!-- フッター -->
       <v-card-actions class="pa-4">
         <v-btn variant="text" rounded="pill" @click="showModal = false">キャンセル</v-btn>
         <v-spacer></v-spacer>
