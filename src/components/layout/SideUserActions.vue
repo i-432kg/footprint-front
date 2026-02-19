@@ -1,6 +1,8 @@
 <script setup>
-import { ref, onMounted, computed } from 'vue';
+import { ref, computed } from 'vue';
 import { useUserStore } from '@/stores/userStore';
+import { rules as commonRules } from '@/utils/validationRules';
+import { VALIDATION_MESSAGES } from '@/constants/validationMessages';
 import postService from '@/services/postService';
 
 /**
@@ -37,6 +39,27 @@ const isSubmitting = ref(false);
 
 /** 投稿ボタンの無効化判定 */
 const isPostDisabled = computed(() => !selectedFile.value || isSubmitting.value);
+
+/** v-formコンポーネントへの参照 */
+const form = ref(null);
+
+/** フォーム全体の妥当性フラグ */
+const isValid = ref(false);
+
+/**
+ * 新規投稿フォーム専用のバリデーションルール定義
+ * @type {Object.<string, Array<Function>>}
+ */
+const postRules = {
+  image: [
+    commonRules.required(VALIDATION_MESSAGES.SELECT_REQUIRED('画像')),
+    commonRules.fileSize(5),
+    commonRules.imageType
+  ],
+  content: [
+    commonRules.max(100)
+  ]
+};
 
 /**
  * ファイル選択時のハンドリング
@@ -77,6 +100,10 @@ const clearPreview = () => {
  */
 const submitPost = async () => {
   if (!selectedFile.value) return;
+
+  // Vuetify のバリデーション実行
+  const { valid } = await form.value.validate();
+  if (!valid) return;
 
   isSubmitting.value = true;
   try {
@@ -132,41 +159,45 @@ const closeModal = () => {
       <v-card-title class="font-weight-bold pa-4">新規投稿</v-card-title>
       <v-divider></v-divider>
       <v-card-text class="pa-4">
-        <!-- 画像選択エリア -->
-        <v-file-input
-          v-model="selectedFile"
-          label="画像を選択（必須）"
-          accept="image/*"
-          prepend-icon="mdi-camera"
-          variant="filled"
-          rounded="lg"
-          @change="onFileChange"
-          @click:clear="onFileChange({ target: { files: [] } })"
-          hide-details
-          class="mb-4"
-        ></v-file-input>
+        <v-form ref="form" v-model="isValid">
+          <!-- 画像選択エリア -->
+          <v-file-input
+            v-model="selectedFile"
+            :rules="postRules.image"
+            label="画像を選択（必須）"
+            accept="image/*"
+            prepend-icon="mdi-camera"
+            variant="filled"
+            rounded="lg"
+            @change="onFileChange"
+            @click:clear="onFileChange({ target: { files: [] } })"
+            class="mb-4"
+          ></v-file-input>
 
-        <!-- 画像プレビュー表示エリア -->
-        <v-expand-transition>
-          <div v-if="previewUrl" class="mb-4">
-            <v-img
-              :src="previewUrl"
-              class="rounded-lg bg-grey-lighten-2"
-              max-height="300"
-              cover
-            ></v-img>
-          </div>
-        </v-expand-transition>
+          <!-- 画像プレビュー表示エリア -->
+          <v-expand-transition>
+            <div v-if="previewUrl" class="mb-4">
+              <v-img
+                :src="previewUrl"
+                class="rounded-lg bg-grey-lighten-2"
+                max-height="300"
+                cover
+              ></v-img>
+            </div>
+          </v-expand-transition>
 
-        <!-- コメント入力エリア -->
-        <v-textarea
-          v-model="postContent"
-          placeholder="コメントを入力（任意）"
-          variant="filled"
-          rounded="lg"
-          rows="4"
-          hide-details
-        ></v-textarea>
+          <!-- コメント入力エリア -->
+          <v-textarea
+            v-model="postContent"
+            :rules="postRules.content"
+            :counter="100"
+            maxlength="100"
+            placeholder="コメントを入力（任意）"
+            variant="filled"
+            rounded="lg"
+            rows="4"
+          ></v-textarea>
+        </v-form>
       </v-card-text>
 
       <!-- フッター -->

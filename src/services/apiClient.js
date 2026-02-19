@@ -5,10 +5,7 @@ import axios from 'axios';
  */
 const apiClient = axios.create({
   baseURL: '',
-  timeout: 10000,
-  headers: {
-    'Content-Type': 'application/json',
-  }
+  timeout: 10000
 });
 
 // インターセプター（必要に応じて認証トークンの付与などをここで行う）
