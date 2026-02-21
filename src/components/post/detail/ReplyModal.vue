@@ -1,5 +1,6 @@
 <script setup>
-import { ref, computed } from 'vue';
+import { ref } from 'vue';
+import { rules as commonRules } from '@/utils/validationRules';
 import postService from '@/services/postService';
 
 /**
@@ -32,11 +33,27 @@ const isSubmitting = ref(false);
 /** ダイアログの開閉状態を管理する */
 const dialog = ref(true);
 
-/** 入力チェック */
-const isValid = computed(() => !!replyContent.value.trim());
+/** v-formコンポーネントへの参照 */
+const form = ref(null);
+
+/** フォーム全体の妥当性フラグ */
+const isValid = ref(false);
+
+/**
+ * 返信投稿フォーム専用のバリデーションルール定義
+ * @type {Object.<string, Array<Function>>}
+ */
+const replyRules = {
+  content: [
+    commonRules.max(100)
+  ]
+};
 
 const submitReply = async () => {
-  if (!isValid.value) return;
+
+  // バリデーション実行
+  const { valid } = await form.value.validate();
+  if (!valid) return;
 
   isSubmitting.value = true;
   try {
@@ -83,19 +100,24 @@ const updateDialog = (val) => {
 
       <!-- 入力欄 -->
       <v-card-text>
-        <v-textarea
-          v-model="replyContent"
-          placeholder="返信を入力してください"
-          variant="filled"
-          auto-grow
-          rows="4"
-          hide-details="auto"
-          bg-color="grey-lighten-4"
-          color="primary"
-          class="rounded-lg"
-          :disabled="isSubmitting"
-          counter
-        ></v-textarea>
+        <v-form ref="form" v-model="isValid">
+          <v-textarea
+            v-model="replyContent"
+            :rules="replyRules.content"
+            :counter="100"
+            maxlength="100"
+            placeholder="返信を入力してください"
+            variant="filled"
+            auto-grow
+            rows="4"
+            hide-details="auto"
+            bg-color="grey-lighten-4"
+            color="primary"
+            class="rounded-lg"
+            :disabled="isSubmitting"
+            counter
+          ></v-textarea>
+        </v-form>
       </v-card-text>
 
       <!-- フッター -->
