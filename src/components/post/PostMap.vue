@@ -102,19 +102,46 @@ const renderMarkers = () => {
 onMounted(() => {
   // 地図の初期化
   if (mapContainer.value) {
-    const initialCenter = [35.6852, 139.7528] // 皇居
+    const defaultCenter = [35.6852, 139.7528] // 皇居
     const initialZoom = 12; // 都道府県〜市区町村くらいの拡大倍率
-    map.value = L.map(mapContainer.value).setView(initialCenter, initialZoom);
 
-    // 地図移動・ズーム終了イベントの検知を開始
-    map.value.on('moveend', handleMoveEnd);
+    // 地図の初期インスタンス作成
+    map.value = L.map(mapContainer.value);
 
+    // タイルレイヤーの追加
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '&copy; OpenStreetMap contributors'
     }).addTo(map.value);
 
-    // 初期表示時：投稿データを取得
-    fetchPosts();
+    // 現在地の取得を試みる
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const { latitude, longitude } = position.coords;
+          map.value.setView([latitude, longitude], initialZoom);
+          // 位置情報取得後に投稿をロード
+          fetchPosts();
+        },
+        (error) => {
+          // 位置情報が取得できなかった場合、デフォルトの中心位置
+          console.warn('位置情報の取得に失敗しました。デフォルト位置を表示します:', error.message);
+          map.value.setView(defaultCenter, initialZoom);
+          fetchPosts();
+        },
+        {
+          enableHighAccuracy: true,
+          timeout: 5000,
+          maximumAge: 0
+        }
+      );
+    } else {
+      // Geolocation API 非対応の場合、デフォルトの中心位置
+      map.value.setView(defaultCenter, initialZoom);
+      fetchPosts();
+    }
+
+    // 地図移動・ズーム終了イベントの検知を開始
+    map.value.on('moveend', handleMoveEnd);
   }
 });
 </script>
