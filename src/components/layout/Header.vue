@@ -1,5 +1,7 @@
 <script setup>
 import { ref } from 'vue';
+import { uiLogger } from '@/utils/logger';
+import { LOG_EVENTS } from '@/constants/logEvents';
 
 const searchQuery = ref('');
 
@@ -8,6 +10,9 @@ const search = () => {
 
   // 未入力の場合は検索しない
   if (!query) return;
+
+  // 検索実行ログ（クエリの内容も記録）
+  uiLogger.info(LOG_EVENTS.POST.SEARCH_EXECUTE, { query });
 
   const params = new URLSearchParams({ q: query });
   window.location.href = `/search?${params.toString()}`;

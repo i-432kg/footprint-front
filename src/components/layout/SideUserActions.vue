@@ -1,8 +1,10 @@
 <script setup>
 import { ref, computed } from 'vue';
 import { useUserStore } from '@/stores/userStore';
+import { uiLogger } from '@/utils/logger';
 import { rules as commonRules } from '@/utils/validationRules';
 import { VALIDATION_MESSAGES } from '@/constants/validationMessages';
+import { LOG_EVENTS } from '@/constants/logEvents';
 import postService from '@/services/postService';
 
 /**
@@ -54,7 +56,7 @@ const postRules = {
   image: [
     commonRules.required(VALIDATION_MESSAGES.SELECT_REQUIRED('画像')),
     commonRules.fileSize(5),
-    commonRules.imageType
+    commonRules.imageType()
   ],
   content: [
     commonRules.max(100)
@@ -103,7 +105,10 @@ const submitPost = async () => {
 
   // Vuetify のバリデーション実行
   const { valid } = await form.value.validate();
-  if (!valid) return;
+  if (!valid) {
+    uiLogger.warn(LOG_EVENTS.POST.CREATE_VALIDATION_FAIL);
+    return;
+  }
 
   isSubmitting.value = true;
   try {
@@ -112,10 +117,11 @@ const submitPost = async () => {
       imageFile: selectedFile.value
     });
 
+    uiLogger.info(LOG_EVENTS.POST.CREATE_SUCCESS);
     closeModal();
     emit('submitted'); // 投稿成功を親に通知
   } catch (error) {
-    console.error('投稿失敗:', error);
+    uiLogger.error(LOG_EVENTS.POST.CREATE_FAILED, { error: error.message });
     alert('投稿に失敗しました。');
   } finally {
     isSubmitting.value = false;
@@ -123,9 +129,18 @@ const submitPost = async () => {
 };
 
 /**
- * モーダルを閉じ、入力フォームとプレビューの状態をリセットする
+ * 投稿モーダルを開く
+ */
+const openModal = () => {
+  uiLogger.info(LOG_EVENTS.POST.CREATE_OPEN);
+  showModal.value = true;
+};
+
+/**
+ * 投稿モーダルを閉じ、入力フォームとプレビューの状態をリセットする
  */
 const closeModal = () => {
+  uiLogger.info(LOG_EVENTS.POST.CREATE_CLOSE);
   showModal.value = false;
   postContent.value = '';
   selectedFile.value = null;
@@ -147,7 +162,7 @@ const closeModal = () => {
       color="primary"
       class="mt-4 rounded-pill"
       size="large"
-      @click="showModal = true"
+      @click="openModal"
     >
       今どうしてる？
     </v-btn>
@@ -202,7 +217,7 @@ const closeModal = () => {
 
       <!-- フッター -->
       <v-card-actions class="pa-4">
-        <v-btn variant="text" rounded="pill" @click="showModal = false">キャンセル</v-btn>
+        <v-btn variant="text" rounded="pill" @click="closeModal">キャンセル</v-btn>
         <v-spacer></v-spacer>
         <v-btn
           color="primary"

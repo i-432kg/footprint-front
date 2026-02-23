@@ -1,6 +1,8 @@
 <script setup>
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
 import { rules as commonRules } from '@/utils/validationRules';
+import { uiLogger } from '@/utils/logger';
+import { LOG_EVENTS } from '@/constants/logEvents';
 import postService from '@/services/postService';
 
 /**
@@ -53,7 +55,10 @@ const submitReply = async () => {
 
   // バリデーション実行
   const { valid } = await form.value.validate();
-  if (!valid) return;
+  if (!valid) {
+    uiLogger.warn(LOG_EVENTS.REPLY.CREATE_VALIDATION_FAIL, { postId: props.postId, parentReplyId: props.parentReplyId });
+    return;
+  }
 
   isSubmitting.value = true;
   try {
@@ -64,6 +69,8 @@ const submitReply = async () => {
       props.parentReplyId
     );
 
+    uiLogger.info(LOG_EVENTS.REPLY.CREATE_SUCCESS, { postId: props.postId, parentReplyId: props.parentReplyId });
+
     // 送信成功時に入力欄をクリア
     replyContent.value = '';
 
@@ -71,7 +78,7 @@ const submitReply = async () => {
     emit('submitted');
     emit('close');
   } catch (error) {
-    console.error('返信の送信に失敗しました:', error);
+    uiLogger.error(LOG_EVENTS.REPLY.CREATE_FAILED, { error: error.message, postId: props.postId });
     alert('返信に失敗しました。');
   } finally {
     // 成否に関わらず送信中フラグを戻す
@@ -79,10 +86,22 @@ const submitReply = async () => {
   }
 };
 
+/**
+ * モーダルを閉じる
+ */
+const closeModal = () => {
+  uiLogger.info(LOG_EVENTS.REPLY.CREATE_CLOSE);
+  emit('close');
+};
+
 /** モーダル外側をクリックした時などのイベント監視 */
 const updateDialog = (val) => {
-  if (!val) emit('close');
+  if (!val) closeModal();
 };
+
+onMounted(() => {
+  uiLogger.info(LOG_EVENTS.REPLY.CREATE_OPEN, { postId: props.postId, parentReplyId: props.parentReplyId });
+});
 </script>
 
 <template>
@@ -127,7 +146,7 @@ const updateDialog = (val) => {
           color="grey-darken-1"
           rounded="pill"
           :disabled="isSubmitting"
-          @click="emit('close')"
+          @click="closeModal"
         >
           キャンセル
         </v-btn>

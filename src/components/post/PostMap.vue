@@ -3,6 +3,8 @@ import { onMounted, ref, render, h, getCurrentInstance} from 'vue';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import postService from "@/services/postService.js";
+import { uiLogger } from '@/utils/logger';
+import { LOG_EVENTS } from '@/constants/logEvents';
 
 import PostPopup from './PostPopup.vue';
 import PostDetailModal from './detail/PostDetailModal.vue';
@@ -45,6 +47,29 @@ const fetchPosts = async () => {
   }
 };
 
+/**
+ * 地図の移動・ズーム終了時のハンドリング
+ */
+const handleMoveEnd = () => {
+  if (!map.value) return;
+
+  const bounds = map.value.getBounds();
+  const zoom = map.value.getZoom();
+
+  // bbox ログ
+  uiLogger.info(LOG_EVENTS.POST.MAP_MOVE, {
+    zoom,
+    bbox: {
+      minLat: bounds.getSouth(),
+      maxLat: bounds.getNorth(),
+      minLng: bounds.getWest(),
+      maxLng: bounds.getEast()
+    }
+  });
+
+  // 必要に応じてここで自動再検索(fetchPostsByBBox等)を呼ぶ構成に拡張可能
+};
+
 // 現在の Vue アプリのインスタンスを取得
 const { appContext } = getCurrentInstance();
 
@@ -80,6 +105,9 @@ onMounted(() => {
     const initialCenter = [35.6852, 139.7528] // 皇居
     const initialZoom = 12; // 都道府県〜市区町村くらいの拡大倍率
     map.value = L.map(mapContainer.value).setView(initialCenter, initialZoom);
+
+    // 地図移動・ズーム終了イベントの検知を開始
+    map.value.on('moveend', handleMoveEnd);
 
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '&copy; OpenStreetMap contributors'

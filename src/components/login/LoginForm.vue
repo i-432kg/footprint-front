@@ -1,7 +1,9 @@
 <script setup>
 import { ref, reactive } from 'vue';
+import { uiLogger } from '@/utils/logger';
 import { rules as commonRules } from '@/utils/validationRules';
 import { VALIDATION_MESSAGES } from '@/constants/validationMessages';
+import { LOG_EVENTS } from '@/constants/logEvents';
 import userService from '@/services/userService';
 /**
  * ログインフォームの入力データ
@@ -46,19 +48,26 @@ const loginRules = {
  */
 const handleLogin = async () => {
 
-  // Vuetifyのバリデーション実行
+  // バリデーション実行
   const { valid } = await form.value.validate();
-  if (!valid) return;
+  if (!valid) {
+    uiLogger.warn(LOG_EVENTS.AUTH.LOGIN_VALIDATION_FAIL);
+    return;
+  }
 
   // 二重送信の防止
   if (isLoggingIn.value) return;
   isLoggingIn.value = true;
 
   try {
-    // ログイン成功時はタイムライン画面へリダイレクトする
+    // ログイン実行
     await userService.login(loginForm.loginId, loginForm.password);
+    uiLogger.info(LOG_EVENTS.AUTH.LOGIN_SUCCESS, { loginId: loginForm.loginId });
+
+    // ログイン成功時はタイムライン画面へリダイレクトする
     window.location.href = '/timeline';
   } catch (error) {
+    uiLogger.warn(LOG_EVENTS.AUTH.LOGIN_FAILURE, { loginId: loginForm.loginId, reason: error.message });
     alert('ログインに失敗しました。IDまたはパスワードを確認してください。');
   } finally {
     isLoggingIn.value = false;

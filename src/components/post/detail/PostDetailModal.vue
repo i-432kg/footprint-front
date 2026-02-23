@@ -2,6 +2,8 @@
 import { onMounted, ref } from "vue";
 import { useReplyStore } from '@/stores/replyStore.js';
 import postService from '@/services/postService.js';
+import { uiLogger } from '@/utils/logger';
+import { LOG_EVENTS } from '@/constants/logEvents';
 
 import ReplyModal from "./ReplyModal.vue";
 import PostDetailContent from "./PostDetailContent.vue";
@@ -46,6 +48,12 @@ const dialog = ref(true);
  * @param {number|null} replyId - 返信先の返信ID（null なら投稿への返信）
  */
 const openReplyModal = (replyId = null) => {
+  // ログ記録：返信ボタンが押された（親返信か子返信かのコンテキストを含む）
+  uiLogger.info(LOG_EVENTS.REPLY.BUTTON_CLICK, {
+    postId: props.post.id,
+    parentReplyId: replyId
+  });
+
   selectedParentReplyId.value = replyId;
   showReplyModal.value = true;
 };
@@ -86,6 +94,7 @@ const handleReplySubmitted = async () => {
 
 /** 投稿詳細モーダルを閉じるときのキャッシュリセット */
 const closeModal = () => {
+  uiLogger.info(LOG_EVENTS.POST.DETAIL_CLOSE, { postId: props.post.id });
   replyStore.reset();
   emit('close');
 };
@@ -102,6 +111,7 @@ const updateDialog = (val) => {
  * - 親返信一覧（1階層目）を取得
  */
 onMounted(async () => {
+  uiLogger.info(LOG_EVENTS.POST.DETAIL_OPEN, { postId: props.post.id });
   await fetchPostDetail();
   await replyStore.fetchTopLevelReplies(props.post.id);
 });

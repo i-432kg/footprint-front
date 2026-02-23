@@ -34,6 +34,6 @@ export const rules = {
   imageType: (message = '画像ファイル(jpg, png, webp)を選択してください') => v => {
     if (!v) return true;
     const file = Array.isArray(v) ? v[0] : v;
-    return /^image\/(jpeg|png|webp)$/.test(file.type) || message;
+    return /^image\/(jpeg|jpg|png|webp)$/.test(file.type) || message;
   }
 };

@@ -2,6 +2,8 @@
 import { computed, ref } from 'vue';
 import { useDateFormatter } from "@/composables/useDateFormatter.js";
 import { useReplyStore } from "@/stores/replyStore.js";
+import { uiLogger } from '@/utils/logger';
+import { LOG_EVENTS } from '@/constants/logEvents';
 
 /**
  * 返信（コメント）を 1 件表示するコンポーネント
@@ -36,6 +38,14 @@ const children = computed(() => replyStore.getChildReplies(props.reply.id));
 const showChildren = computed(() => replyStore.isExpanded(props.reply.id));
 
 /**
+ * 返信ボタンクリック時のハンドリング
+ */
+const handleReplyClick = () => {
+  uiLogger.info(LOG_EVENTS.REPLY.BUTTON_CLICK, { replyId: props.reply.id });
+  emit('reply', props.reply.id);
+};
+
+/**
  * 「n件の返信を表示/非表示」をトグルする
  */
 const toggleChildren = async () => {
@@ -44,6 +54,9 @@ const toggleChildren = async () => {
     replyStore.collapse(props.reply.id);
     return;
   }
+
+  // ログ記録：子返信の展開（どの返信に対してかIDを含める）
+  uiLogger.info(LOG_EVENTS.REPLY.LIST_EXPAND, { replyId: props.reply.id });
 
   replyStore.expand(props.reply.id);
 
@@ -82,7 +95,7 @@ const toggleChildren = async () => {
             size="x-small"
             rounded="pill"
             prepend-icon="mdi-reply"
-            @click="emit('reply', reply.id)"
+            @click="handleReplyClick"
           >
             返信する
           </v-btn>

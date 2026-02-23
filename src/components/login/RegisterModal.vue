@@ -1,7 +1,9 @@
 <script setup>
 import { ref, reactive, computed } from 'vue';
 import { rules as commonRules } from '@/utils/validationRules';
+import { uiLogger } from '@/utils/logger';
 import { VALIDATION_MESSAGES } from '@/constants/validationMessages';
+import { LOG_EVENTS } from '@/constants/logEvents';
 import userService from "@/services/userService.js";
 
 /**
@@ -76,8 +78,16 @@ const registerRules = {
  * バリデーションが成功している場合のみ遷移する
  */
 const nextStep = async () => {
-  if (!isValid.value) return;
+  // バリデーション実行
+  const { valid } = await form.value.validate();
+  if (!valid) {
+    uiLogger.warn(LOG_EVENTS.AUTH.SIGNUP_VALIDATION_FAIL);
+    return;
+  }
+
+  // 次のステップに進む
   step.value = STEPS.CONFIRM;
+  uiLogger.info(LOG_EVENTS.AUTH.SIGNUP_CONFIRM_OPEN);
 };
 
 /**
@@ -93,9 +103,11 @@ const handleRegister = async () => {
 
   try {
     await userService.signup(registerForm);
+    uiLogger.info(LOG_EVENTS.AUTH.SIGNUP_SUCCESS, { loginId: registerForm.loginId });
     emit('registered');
     closeModal();
   } catch (error) {
+    uiLogger.error(LOG_EVENTS.AUTH.SIGNUP_FAILURE, { loginId: registerForm.loginId, reason: error.message });
     alert('登録に失敗しました。このIDは既に使用されている可能性があります。');
   } finally {
     isRegistering.value = false;
@@ -107,6 +119,7 @@ const handleRegister = async () => {
  * ステップを初期化してから親コンポーネントに通知する
  */
 const closeModal = () => {
+  uiLogger.info(LOG_EVENTS.AUTH.SIGNUP_CLOSE);
   step.value = STEPS.INPUT;
   emit('update:modelValue', false);
 };
