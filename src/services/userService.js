@@ -1,20 +1,34 @@
 import apiClient, { withLog } from './apiClient';
 import { LOG_EVENTS } from '@/constants/logEvents';
+import { mapToPostList } from '@/models/postModel';
+import { mapToReplyList } from '@/models/replyModel';
+import { mapToUser, createSignupRequest } from '@/models/userModel';
 
 export default {
-  /** ログイン中のユーザー情報を取得 */
-  getMe() {
-    return apiClient.get('/users/me', withLog(LOG_EVENTS.ME.FETCH));
+
+  /** ログインユーザー自身の情報を取得 */
+  async fetchMe() {
+    const data =
+      await apiClient.get('/users/me', withLog(LOG_EVENTS.ME.PROFILE_FETCH));
+    return mapToUser(data);
   },
 
   /** ログインユーザの投稿一覧を取得 */
-  getMyPosts() {
-    return apiClient.get('/users/me/posts', withLog(LOG_EVENTS.ME.POSTS_FETCH));
+  async fetchMyPosts(lastId, size) {
+    const data =
+      await apiClient.get('/users/me/posts',
+        withLog(LOG_EVENTS.ME.POSTS_FETCH, { params: { lastId, size } })
+      );
+    return mapToPostList(data);
   },
 
   /** ログインユーザの返信一覧を取得 */
-  getMyReplies() {
-    return apiClient.get('/users/me/replies', withLog(LOG_EVENTS.ME.REPLIES_FETCH));
+  async fetchMyReplies(lastId, size) {
+    const data =
+      await apiClient.get('/users/me/replies',
+        withLog(LOG_EVENTS.ME.REPLIES_FETCH, { params: { lastId, size } })
+      );
+    return mapToReplyList(data);
   },
 
   /** ログイン実行 */
@@ -33,8 +47,11 @@ export default {
     );
   },
 
-  /** 会員登録 */
-  signup(userData) {
-    return apiClient.post('/signup', userData, withLog(LOG_EVENTS.AUTH.SIGNUP_SUCCESS));
-  }
+  /** ユーザー登録 */
+  async signup(formData) {
+    // フォームの生データをAPI用のリクエスト形式に変換
+    const requestBody = createSignupRequest(formData);
+
+    return apiClient.post('/users', requestBody, withLog(LOG_EVENTS.AUTH.SIGNUP_SUCCESS));
+  },
 };

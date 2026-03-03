@@ -20,9 +20,29 @@ const { formatDate } = useDateFormatter();
 <template>
   <v-container class="pa-0">
     <!-- 画像エリア -->
-    <v-card v-if="post.imageUrl" variant="flat" color="black" class="rounded-xl overflow-hidden mb-4">
+    <v-card v-if="post.hasImages" variant="flat" color="black" class="rounded-xl overflow-hidden mb-4">
+      <v-carousel
+        v-if="post.images.length > 1"
+        hide-delimiter-background
+        show-arrows="hover"
+        height="auto"
+      >
+        <v-carousel-item
+          v-for="image in post.images"
+          :key="image.id"
+        >
+          <v-img
+            :src="image.url"
+            alt="投稿画像"
+            max-height="500"
+            width="100%"
+            cover
+          ></v-img>
+        </v-carousel-item>
+      </v-carousel>
       <v-img
-        :src="post.imageUrl"
+        v-else
+        :src="post.mainImageUrl"
         alt="投稿画像"
         max-height="500"
         width="100%"
@@ -40,19 +60,19 @@ const { formatDate } = useDateFormatter();
     <div class="px-2">
       <!-- 投稿本文 -->
       <p class="text-body-1 mb-4" style="white-space: pre-wrap; line-height: 1.6;">
-        {{ post.comment }}
+        {{ post.caption }}
       </p>
 
       <!-- 緯度経度表示 -->
       <v-chip
-        v-if="post.latitude"
+        v-if="post.hasLocation"
         size="small"
         color="primary"
         variant="tonal"
         prepend-icon="mdi-map-marker"
         class="mb-6"
       >
-        {{ post.latitude.toFixed(4) }}, {{ post.longitude.toFixed(4) }}
+        {{ post.location.lat.toFixed(4) }}, {{ post.location.lng.toFixed(4) }}
       </v-chip>
 
       <!-- メタ情報とアクション -->

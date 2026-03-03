@@ -30,15 +30,18 @@ const step = ref(STEPS.INPUT);
 
 /**
  * 新規登録フォームの入力データ
+ *
  * @type {Object}
- * @property {string} loginId - ログインID
+ * @property {string} email - メールアドレス（ログインID）
+ * @property {string} username - ユーザーの表示名
  * @property {string} password - パスワード
- * @property {string} birthDate - 生年月日
+ * @property {string} birthdate - 生年月日
  */
 const registerForm = reactive({
-  loginId: '',
+  email: '',
+  username: '',
   password: '',
-  birthDate: ''
+  birthdate: ''
 });
 
 /** 登録処理の実行中フラグ */
@@ -58,8 +61,12 @@ const isInputStep = computed(() => step.value === STEPS.INPUT);
  * @type {Object.<string, Array<Function>>}
  */
 const registerRules = {
-  loginId: [
-    commonRules.required(VALIDATION_MESSAGES.REQUIRED('ログインID')),
+  email: [
+    commonRules.required(VALIDATION_MESSAGES.REQUIRED('メールアドレス')),
+    commonRules.email()
+  ],
+  username: [
+    commonRules.required(VALIDATION_MESSAGES.REQUIRED('表示名')),
     commonRules.min(4),
     commonRules.max(20),
     commonRules.alphanumericUnderscore()
@@ -68,7 +75,7 @@ const registerRules = {
     commonRules.required(VALIDATION_MESSAGES.REQUIRED('パスワード')),
     commonRules.min(8)
   ],
-  birthDate: [
+  birthdate: [
     commonRules.required(VALIDATION_MESSAGES.SELECT_REQUIRED('生年月日'))
   ]
 };
@@ -103,12 +110,12 @@ const handleRegister = async () => {
 
   try {
     await userService.signup(registerForm);
-    uiLogger.info(LOG_EVENTS.AUTH.SIGNUP_SUCCESS, { loginId: registerForm.loginId });
+    uiLogger.info(LOG_EVENTS.AUTH.SIGNUP_SUCCESS, { email: registerForm.email });
     emit('registered');
     closeModal();
   } catch (error) {
-    uiLogger.error(LOG_EVENTS.AUTH.SIGNUP_FAILURE, { loginId: registerForm.loginId, reason: error.message });
-    alert('登録に失敗しました。このIDは既に使用されている可能性があります。');
+    uiLogger.error(LOG_EVENTS.AUTH.SIGNUP_FAILURE, { email: registerForm.email, reason: error.message });
+    alert('登録に失敗しました。このメールアドレスは既に使用されている可能性があります。');
   } finally {
     isRegistering.value = false;
   }
@@ -138,9 +145,18 @@ const closeModal = () => {
             <!-- ステップ1: 入力 -->
             <v-window-item :value="STEPS.INPUT">
               <v-text-field
-                v-model="registerForm.loginId"
-                :rules="registerRules.loginId"
-                label="ログインID"
+                v-model="registerForm.email"
+                :rules="registerRules.email"
+                label="メールアドレス (ログインID)"
+                type="email"
+                variant="filled"
+                class="mb-2"
+                rounded="lg"
+              ></v-text-field>
+              <v-text-field
+                v-model="registerForm.username"
+                :rules="registerRules.username"
+                label="表示名 (ユーザー名)"
                 variant="filled"
                 class="mb-2"
                 rounded="lg"
@@ -155,8 +171,8 @@ const closeModal = () => {
                 rounded="lg"
               ></v-text-field>
               <v-text-field
-                v-model="registerForm.birthDate"
-                :rules="registerRules.birthDate"
+                v-model="registerForm.birthdate"
+                :rules="registerRules.birthdate"
                 label="生年月日"
                 type="date"
                 variant="filled"
@@ -173,8 +189,9 @@ const closeModal = () => {
                 text="以下の内容で登録しますか？"
               ></v-alert>
               <v-list class="bg-grey-lighten-4 rounded-lg">
-                <v-list-item title="ログインID" :subtitle="registerForm.loginId"></v-list-item>
-                <v-list-item title="生年月日" :subtitle="registerForm.birthDate"></v-list-item>
+                <v-list-item title="メールアドレス" :subtitle="registerForm.email"></v-list-item>
+                <v-list-item title="表示名" :subtitle="registerForm.username"></v-list-item>
+                <v-list-item title="生年月日" :subtitle="registerForm.birthdate"></v-list-item>
               </v-list>
             </v-window-item>
           </v-window>

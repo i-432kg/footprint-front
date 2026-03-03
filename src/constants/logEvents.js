@@ -47,5 +47,6 @@ export const LOG_EVENTS = {
     FETCH: { event: 'ME_FETCH', message: 'Fetching current user info' },
     POSTS_FETCH: { event: 'ME_POSTS_FETCH', message: 'Fetching user posts' },
     REPLIES_FETCH: { event: 'ME_REPLIES_FETCH', message: 'Fetching user replies' },
+    PROFILE_FETCH: { event: 'ME_PROFILE_FETCH', message: 'Fetching my profile' },
   }
 };

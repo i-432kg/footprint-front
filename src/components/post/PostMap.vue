@@ -77,9 +77,9 @@ const renderMarkers = () => {
   if (!map.value) return;
 
   posts.value.forEach(post => {
-    if (post.latitude && post.longitude) {
+    if (post.hasLocation) {
 
-      const marker = L.marker([post.latitude, post.longitude], { icon: customIcon })
+      const marker = L.marker([post.location.lat, post.location.lng], { icon: customIcon })
         .addTo(map.value);
 
       // Leaflet内部でPostPopupを利用するための設定

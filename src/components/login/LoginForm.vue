@@ -28,8 +28,8 @@ const form = ref(null);
  */
 const loginRules = {
   loginId: [
-    commonRules.required(VALIDATION_MESSAGES.REQUIRED('ログインID')),
-    commonRules.alphanumericUnderscore(VALIDATION_MESSAGES.INVALID_FORMAT)
+    commonRules.required(VALIDATION_MESSAGES.REQUIRED('メールアドレス')),
+    commonRules.email()
   ],
   password: [
     commonRules.required(VALIDATION_MESSAGES.REQUIRED('パスワード'))

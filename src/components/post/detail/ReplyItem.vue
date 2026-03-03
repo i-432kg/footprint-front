@@ -81,7 +81,7 @@ const toggleChildren = async () => {
     >
       <v-card-text class="pa-3">
         <!-- 返信本文 -->
-        <p class="text-body-2 mb-2" style="white-space: pre-wrap;">{{ reply.content }}</p>
+        <p class="text-body-2 mb-2" style="white-space: pre-wrap;">{{ reply.message }}</p>
 
         <!-- メタ情報と返信ボタン -->
         <v-row align="center" no-gutters>
@@ -103,8 +103,8 @@ const toggleChildren = async () => {
       </v-card-text>
 
       <!-- 子返信の展開トリガー -->
-      <v-divider v-if="(reply.replyCount && reply.replyCount > 0) || children.length > 0"></v-divider>
-      <v-card-actions v-if="(reply.replyCount && reply.replyCount > 0) || children.length > 0" class="pa-1">
+      <v-divider v-if="reply.hasChildren || children.length > 0"></v-divider>
+      <v-card-actions v-if="reply.hasChildren || children.length > 0" class="pa-1">
         <v-btn
           variant="text"
           block
@@ -116,7 +116,7 @@ const toggleChildren = async () => {
           <template v-slot:prepend>
             <v-icon :icon="showChildren ? 'mdi-chevron-down' : 'mdi-chevron-right'"></v-icon>
           </template>
-          {{ showChildren ? '返信を非表示' : `${reply.replyCount || children.length} 件の返信を表示` }}
+          {{ showChildren ? '返信を非表示' : `${reply.childCount || children.length} 件の返信を表示` }}
         </v-btn>
       </v-card-actions>
     </v-card>

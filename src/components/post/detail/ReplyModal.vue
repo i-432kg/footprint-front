@@ -27,7 +27,7 @@ const props = defineProps({
 const emit = defineEmits(['close', 'submitted']);
 
 // 入力欄の内容
-const replyContent = ref('');
+const replyMessage = ref('');
 
 // 送信中フラグ（二重送信防止）
 const isSubmitting = ref(false);
@@ -65,14 +65,14 @@ const submitReply = async () => {
 
     await postService.createReply(
       props.postId,
-      replyContent.value,
+      replyMessage.value,
       props.parentReplyId
     );
 
     uiLogger.info(LOG_EVENTS.REPLY.CREATE_SUCCESS, { postId: props.postId, parentReplyId: props.parentReplyId });
 
     // 送信成功時に入力欄をクリア
-    replyContent.value = '';
+    replyMessage.value = '';
 
     // 送信成功時にモーダルを閉じる
     emit('submitted');
@@ -121,7 +121,7 @@ onMounted(() => {
       <v-card-text>
         <v-form ref="form" v-model="isValid">
           <v-textarea
-            v-model="replyContent"
+            v-model="replyMessage"
             :rules="replyRules.content"
             :counter="100"
             maxlength="100"

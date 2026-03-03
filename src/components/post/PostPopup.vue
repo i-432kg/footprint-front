@@ -18,8 +18,8 @@ const openDetailModal = () => {
   >
     <!-- 画像 -->
     <v-img
-      v-if="post.imageUrl"
-      :src="post.imageUrl"
+      v-if="post.mainImageUrl"
+      :src="post.mainImageUrl"
       alt="投稿画像"
       height="140"
       cover
@@ -30,7 +30,7 @@ const openDetailModal = () => {
     <v-card-text class="pa-3">
       <!-- 投稿コメント -->
       <p class="text-body-2 mb-2 text-truncate-2">
-        {{ post.comment }}
+        {{ post.caption }}
       </p>
 
       <v-divider class="mb-2"></v-divider>

@@ -22,6 +22,10 @@ export const rules = {
   sameAs: (targetValue, message = VALIDATION_MESSAGES.PASSWORD_MISMATCH) =>
     v => v === targetValue || message,
 
+  /** メールアドレス形式チェック */
+  email: (message = VALIDATION_MESSAGES.INVALID_EMAIL) =>
+    v => !v || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v) || message,
+
   /** ファイルサイズチェック (MB単位) */
   fileSize: (maxMb, message) => v => {
     if (!v) return true;
