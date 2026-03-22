@@ -21,7 +21,7 @@ const emit = defineEmits(['reply']);
 </script>
 
 <template>
-  <v-list class="comment-thread bg-transparent" aria-label="返信一覧">
+  <v-list class="comment-thread bg-transparent text-black" aria-label="返信一覧">
     <!-- 返信がある場合のリスト表示 -->
     <div v-if="replies.length > 0" class="reply-chain pl-2 pl-sm-4">
       <ReplyItem
@@ -33,7 +33,7 @@ const emit = defineEmits(['reply']);
     </div>
 
     <!-- 返信がまだない場合のメッセージ -->
-    <v-list-item v-else class="text-center text-caption text-medium-emphasis py-4">
+    <v-list-item v-else class="text-center text-caption text-black py-4">
       まだ返信はありません。
     </v-list-item>
   </v-list>

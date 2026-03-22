@@ -79,22 +79,22 @@ const toggleChildren = async () => {
       :color="isChild ? 'grey-lighten-3' : 'grey-lighten-2'"
       :class="['rounded-lg', { 'bg-grey-lighten-5': isChild, 'bg-white': !isChild }]"
     >
-      <v-card-text class="pa-3">
+      <v-card-text class="pa-3 text-black">
         <!-- 返信本文 -->
-        <p class="text-body-2 mb-2" style="white-space: pre-wrap;">{{ reply.message }}</p>
+        <p class="text-body-2 mb-2 text-black" style="white-space: pre-wrap;">{{ reply.message }}</p>
 
         <!-- メタ情報と返信ボタン -->
         <v-row align="center" no-gutters>
-          <span class="text-caption text-medium-emphasis">
+          <span class="text-caption text-black">
             {{ formatDate(reply.createdAt) }}
           </span>
           <v-spacer></v-spacer>
           <v-btn
             variant="text"
             color="primary"
-            size="x-small"
             rounded="pill"
             prepend-icon="mdi-reply"
+            size="small"
             @click="handleReplyClick"
           >
             返信する
@@ -109,7 +109,7 @@ const toggleChildren = async () => {
           variant="text"
           block
           size="small"
-          class="text-none"
+          class="text-none text-black"
           :loading="isLoading"
           @click="toggleChildren"
         >
@@ -135,13 +135,3 @@ const toggleChildren = async () => {
     </v-expand-transition>
   </div>
 </template>
-
-<style scoped>
-.reply-wrapper {
-  width: 100%;
-}
-
-.child-replies {
-  border-left: 2px solid rgba(var(--v-border-color), 0.1);
-}
-</style>
