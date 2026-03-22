@@ -1,10 +1,12 @@
 <script setup>
-import { onMounted, ref, render, h, getCurrentInstance} from 'vue';
+import { onMounted, ref, createApp, getCurrentInstance } from 'vue';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import postService from "@/services/postService.js";
 import { uiLogger } from '@/utils/logger';
 import { LOG_EVENTS } from '@/constants/logEvents';
+import vuetify from '@/plugins/vuetify';
+import pinia from '@/stores';
 
 import PostPopup from './PostPopup.vue';
 import PostDetailModal from './detail/PostDetailModal.vue';
@@ -28,6 +30,7 @@ const customIcon = L.icon({
 const mapContainer = ref(null);
 const map = ref(null);
 const posts = ref([]);
+const markers = ref([]);
 const selectedPost = ref(null);
 const isModalOpen = ref(false);
 
@@ -36,9 +39,21 @@ const openDetail = (post) => {
   isModalOpen.value = true;
 };
 
+/**
+ * 地図の表示範囲に基づいて投稿を取得する
+ */
 const fetchPosts = async () => {
+  if (!map.value) return;
+
   try {
-    posts.value = await postService.fetchTimeline();
+    const bounds = map.value.getBounds();
+    const minLat = bounds.getSouth();
+    const maxLat = bounds.getNorth();
+    const minLng = bounds.getWest();
+    const maxLng = bounds.getEast();
+
+    // 地図検索APIを呼び出し
+    posts.value = await postService.searchMap(minLat, maxLat, minLng, maxLng);
 
     // 取得した投稿を地図に描画
     renderMarkers();
@@ -67,7 +82,8 @@ const handleMoveEnd = () => {
     }
   });
 
-  // 必要に応じてここで自動再検索(fetchPostsByBBox等)を呼ぶ構成に拡張可能
+  // 移動が終わるたびに範囲内の投稿を再取得
+  fetchPosts();
 };
 
 // 現在の Vue アプリのインスタンスを取得
@@ -76,24 +92,35 @@ const { appContext } = getCurrentInstance();
 const renderMarkers = () => {
   if (!map.value) return;
 
+  // 既存のマーカーをすべて削除
+  markers.value.forEach(marker => map.value.removeLayer(marker));
+  markers.value = [];
+
   posts.value.forEach(post => {
     if (post.hasLocation) {
-
       const marker = L.marker([post.location.lat, post.location.lng], { icon: customIcon })
         .addTo(map.value);
 
-      // Leaflet内部でPostPopupを利用するための設定
+      // 後で削除できるように配列に保持
+      markers.value.push(marker);
+
       const container = document.createElement('div');
-      const vnode = h(PostPopup, {
+      const popupApp = createApp(PostPopup, {
         post,
         onShowDetail: (clickedPost) => openDetail(clickedPost)
       });
-      vnode.appContext = appContext;
-      render(vnode, container);
+
+      popupApp.use(pinia);
+      popupApp.use(vuetify);
+      popupApp.mount(container);
 
       marker.bindPopup(container, {
         maxWidth: 280,
         minWidth: 150
+      });
+
+      marker.on('popupclose', () => {
+        popupApp.unmount();
       });
     }
   });
