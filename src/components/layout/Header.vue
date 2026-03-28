@@ -1,10 +1,23 @@
 <script setup>
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
 import { uiLogger } from '@/utils/logger';
 import { LOG_EVENTS } from '@/constants/logEvents';
 
+/**
+ * 検索クエリ文字列
+ * @type {import('vue').Ref<string>}
+ */
 const searchQuery = ref('');
 
+/**
+ * 現在のブラウザパス（アクティブなリンクの判定に使用）
+ * @type {import('vue').Ref<string>}
+ */
+const currentPath = ref(typeof window !== 'undefined' ? window.location.pathname : '');
+
+/**
+ * 検索を実行し、検索結果ページへ遷移する
+ */
 const search = () => {
   const query = (searchQuery.value || '').trim();
 
@@ -17,6 +30,11 @@ const search = () => {
   const params = new URLSearchParams({ q: query });
   window.location.href = `/search?${params.toString()}`;
 };
+
+onMounted(() => {
+  // 現在のパスを取得
+  currentPath.value = window.location.pathname;
+});
 </script>
 
 <template>
@@ -29,8 +47,24 @@ const search = () => {
     </v-app-bar-title>
 
     <!-- ナビゲーション -->
-    <v-btn variant="text" href="/map" class="hidden-sm-and-down">Maps</v-btn>
-    <v-btn variant="text" href="/timeline" class="hidden-sm-and-down text-primary border-b-lg">TL</v-btn>
+    <v-btn
+      variant="text"
+      href="/map"
+      class="hidden-sm-and-down rounded-0"
+      height="100%"
+      :class="{ 'text-primary border-b-lg': currentPath.startsWith('/map') }"
+    >
+      Maps
+    </v-btn>
+    <v-btn
+      variant="text"
+      href="/timeline"
+      class="hidden-sm-and-down rounded-0"
+      height="100%"
+      :class="{ 'text-primary border-b-lg': currentPath.startsWith('/timeline') }"
+    >
+      TL
+    </v-btn>
 
     <v-spacer></v-spacer>
 
@@ -55,7 +89,3 @@ const search = () => {
     <v-btn icon="mdi-account-circle" href="/mypage" title="MyPage"></v-btn>
   </v-app-bar>
 </template>
-
-<style scoped>
-
-</style>

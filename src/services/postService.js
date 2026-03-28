@@ -22,6 +22,15 @@ export default {
     return mapToPostList(data);
   },
 
+  /** 地図検索実行 */
+  async searchMap(minLat, maxLat, minLng, maxLng) {
+    const data =
+      await apiClient.get('/posts/search/map',
+        withLog(LOG_EVENTS.POST.SEARCH_FETCH, { params: { minLat, maxLat, minLng, maxLng } })
+      );
+    return mapToPostList(data);
+  },
+
   /** 投稿詳細取得 */
   async fetchDetail(postId) {
     const data =
