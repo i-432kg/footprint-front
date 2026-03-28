@@ -28,7 +28,7 @@ export default defineConfig({
     },
   },
   build: {
-    manifest: true,
+    manifest: 'manifest.json',
     rollupOptions: {
       input: {
         login: resolve(__dirname, 'src/entries/login/main.js'),
