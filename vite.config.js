@@ -1,13 +1,12 @@
-import {fileURLToPath, URL} from 'node:url'
-
-import {defineConfig} from 'vite'
-import vue from '@vitejs/plugin-vue'
-import vuetify from "vite-plugin-vuetify";
-import vueDevTools from 'vite-plugin-vue-devtools'
-import devtoolsJson from "vite-plugin-devtools-json";
+import { fileURLToPath, URL } from 'node:url'
 import { resolve } from 'path'
 
-// https://vite.dev/config/
+import { defineConfig } from 'vite'
+import vue from '@vitejs/plugin-vue'
+import vuetify from 'vite-plugin-vuetify'
+import vueDevTools from 'vite-plugin-vue-devtools'
+import devtoolsJson from 'vite-plugin-devtools-json'
+
 export default defineConfig({
   plugins: [
     vue(),
@@ -17,7 +16,7 @@ export default defineConfig({
   ],
   resolve: {
     alias: {
-      '@': fileURLToPath(new URL('./src', import.meta.url))
+      '@': fileURLToPath(new URL('./src', import.meta.url)),
     },
   },
   server: {
@@ -29,9 +28,9 @@ export default defineConfig({
     },
   },
   build: {
+    manifest: true,
     rollupOptions: {
       input: {
-        // 各画面ごとのエントリーポイントを定義
         login: resolve(__dirname, 'src/entries/login/main.js'),
         map: resolve(__dirname, 'src/entries/map/main.js'),
         mypage: resolve(__dirname, 'src/entries/mypage/main.js'),
@@ -39,10 +38,10 @@ export default defineConfig({
         timeline: resolve(__dirname, 'src/entries/timeline/main.js'),
       },
       output: {
-        entryFileNames: `assets/[name].js`,
-        chunkFileNames: `assets/[name]-[hash].js`,
-        assetFileNames: `assets/[name]-[hash].[ext]`
-      }
-    }
-  }
+        entryFileNames: 'assets/[name].js',
+        chunkFileNames: 'assets/[name]-[hash].js',
+        assetFileNames: 'assets/[name]-[hash].[ext]',
+      },
+    },
+  },
 })
