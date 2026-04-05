@@ -8,6 +8,7 @@ class FrontLogger {
    */
   constructor(category) {
     this.category = category;
+    this.enabled = import.meta.env.DEV || import.meta.env.MODE === 'staging';
   }
 
   /**
@@ -41,6 +42,7 @@ class FrontLogger {
    * @param {Object} [extra] 追加情報
    */
   info(eventOrDef, message, extra) {
+    if (!this.enabled) return;
     const { event, msg, ext } = this._resolveArgs(eventOrDef, message, extra);
     console.info(JSON.stringify(this._createLogObject('INFO', event, msg, ext)));
   }
@@ -52,6 +54,7 @@ class FrontLogger {
    * @param {Object} [extra] 追加情報
    */
   warn(eventOrDef, message, extra) {
+    if (!this.enabled) return;
     const { event, msg, ext } = this._resolveArgs(eventOrDef, message, extra);
     console.warn(JSON.stringify(this._createLogObject('WARN', event, msg, ext)));
   }
@@ -63,6 +66,7 @@ class FrontLogger {
    * @param {Object} [extra] 追加情報
    */
   error(eventOrDef, message, extra) {
+    if (!this.enabled) return;
     const { event, msg, ext } = this._resolveArgs(eventOrDef, message, extra);
     console.error(JSON.stringify(this._createLogObject('ERROR', event, msg, ext)));
   }
@@ -74,10 +78,9 @@ class FrontLogger {
    * @param {Object} [extra] 追加情報
    */
   debug(eventOrDef, message, extra) {
-    if (import.meta.env.DEV) {
-      const { event, msg, ext } = this._resolveArgs(eventOrDef, message, extra);
-      console.debug(JSON.stringify(this._createLogObject('DEBUG', event, msg, ext)));
-    }
+    if (!this.enabled) return;
+    const { event, msg, ext } = this._resolveArgs(eventOrDef, message, extra);
+    console.debug(JSON.stringify(this._createLogObject('DEBUG', event, msg, ext)));
   }
 
   /**
