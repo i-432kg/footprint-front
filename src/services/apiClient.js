@@ -2,6 +2,20 @@ import axios from 'axios';
 import { apiLogger } from '@/utils/logger';
 
 /**
+ * Cookie から指定名の値を取得する
+ * @param {string} name
+ * @returns {string|null}
+ */
+const getCookieValue = (name) => {
+  const cookies = document.cookie ? document.cookie.split('; ') : [];
+  const target = cookies.find((cookie) => cookie.startsWith(`${name}=`));
+  if (!target) {
+    return null;
+  }
+  return decodeURIComponent(target.substring(name.length + 1));
+};
+
+/**
  * アプリケーション全体の共通APIクライアント（Axiosインスタンス）
  *
  * 【主な役割】
@@ -9,10 +23,13 @@ import { apiLogger } from '@/utils/logger';
  * 2. ログデザインに基づいた通信ログの自動出力
  * 3. サーバー側との相関ID（traceId）の連携
  * 4. レスポンスデータの簡略化（response.data の直接返却）
+ * 5. CSRF トークンの自動付与
  */
 const instance = axios.create({
   baseURL: '/api',
   timeout: 10000,
+  xsrfCookieName: 'XSRF-TOKEN',
+  xsrfHeaderName: 'X-XSRF-TOKEN',
 });
 
 /**
@@ -41,6 +58,18 @@ instance.interceptors.request.use(
   (config) => {
     // 処理時間計算のために開始時間を記録
     config.metadata = { startTime: new Date() };
+
+    const method = config.method?.toUpperCase();
+
+    // CSRF 対象メソッドに対してトークンを付与
+    if (method && method !== 'GET' && method !== 'HEAD' && method !== 'OPTIONS') {
+      const csrfToken = getCookieValue('XSRF-TOKEN');
+      if (csrfToken) {
+        config.headers = config.headers || {};
+        config.headers['X-XSRF-TOKEN'] = csrfToken;
+      }
+    }
+
     return config;
   },
   (error) => {
