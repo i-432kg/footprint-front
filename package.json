@@ -17,7 +17,6 @@
   },
   "dependencies": {
     "@mdi/font": "^7.4.47",
-    "axios": "^1.13.2",
     "components": "^0.1.0",
     "leaflet": "^1.9.4",
     "pinia": "^3.0.4",
