@@ -202,6 +202,7 @@ const request = async (method, path, body, config = {}) => {
   const upperMethod = method.toUpperCase();
   const requestPath = buildUrl(path, config.params);
   const headers = new Headers(config.headers || {});
+  let response;
 
   // 安全メソッド以外は Spring Security 向けに CSRF トークンを付与する。
   if (!METHODS_WITHOUT_CSRF.has(upperMethod)) {
@@ -226,56 +227,14 @@ const request = async (method, path, body, config = {}) => {
   }
 
   try {
-    const response = await fetch(requestPath, {
+    response = await fetch(requestPath, {
       method: upperMethod,
       headers,
       body: prepareBody(upperMethod, body, headers),
       credentials: 'same-origin',
       signal: abortController.signal,
     });
-
-    const data = await parseResponseBody(response);
-    const durationMs = Date.now() - startedAt;
-    const traceId = response.headers.get('x-trace-id');
-
-    // fetch は 4xx/5xx で reject しないため、既存 try/catch を保つために明示的に例外化する。
-    if (!response.ok) {
-      const error = createApiError({
-        message: data?.message || `Request failed with status ${response.status}`,
-        status: response.status,
-        data,
-        headers: response.headers,
-        method: upperMethod,
-        path: requestPath,
-        logEvent: config.logEvent,
-      });
-
-      logRequestFailure(error, {
-        method: upperMethod,
-        path: requestPath,
-        status: response.status,
-        durationMs,
-        traceId,
-        errorCode: data?.code,
-      });
-
-      throw error;
-    }
-
-    apiLogger.info(config.logEvent || 'API_SUCCESS', 'API request succeeded', {
-      method: upperMethod,
-      path: requestPath,
-      status: response.status,
-      durationMs,
-      traceId,
-    });
-
-    return data;
   } catch (error) {
-    if (error instanceof Error && error.name === 'ApiError') {
-      throw error;
-    }
-
     // ネットワーク断や AbortError も呼び出し側では同じ API エラーとして扱える形へそろえる。
     const message = error instanceof DOMException && error.name === 'AbortError'
       ? timeoutController.signal.aborted
@@ -305,6 +264,44 @@ const request = async (method, path, body, config = {}) => {
     timeoutController.signal.removeEventListener('abort', abort);
     config.signal?.removeEventListener('abort', abort);
   }
+
+  const data = await parseResponseBody(response);
+  const durationMs = Date.now() - startedAt;
+  const traceId = response.headers.get('x-trace-id');
+
+  // fetch は 4xx/5xx で reject しないため、レスポンス取得後に HTTP エラーを明示的に例外化する。
+  if (!response.ok) {
+    const error = createApiError({
+      message: data?.message || `Request failed with status ${response.status}`,
+      status: response.status,
+      data,
+      headers: response.headers,
+      method: upperMethod,
+      path: requestPath,
+      logEvent: config.logEvent,
+    });
+
+    logRequestFailure(error, {
+      method: upperMethod,
+      path: requestPath,
+      status: response.status,
+      durationMs,
+      traceId,
+      errorCode: data?.code,
+    });
+
+    throw error;
+  }
+
+  apiLogger.info(config.logEvent || 'API_SUCCESS', 'API request succeeded', {
+    method: upperMethod,
+    path: requestPath,
+    status: response.status,
+    durationMs,
+    traceId,
+  });
+
+  return data;
 };
 
 export default {
