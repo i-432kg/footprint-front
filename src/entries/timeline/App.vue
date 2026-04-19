@@ -19,7 +19,10 @@ import PostDetailModal from '@/components/post/detail/PostDetailModal.vue';
  * - 各種モーダル（新規投稿・投稿詳細）の制御
  */
 
-/** 投稿詳細モーダルで表示するために選択された投稿オブジェクト */
+/**
+ * 投稿詳細モーダルで表示するために選択された投稿オブジェクト。
+ * @type {import('vue').Ref<Object|null>}
+ */
 const selectedPost = ref(null);
 
 /**
@@ -28,10 +31,28 @@ const selectedPost = ref(null);
  * 'grid': 画像をタイル状に並べて表示（ギャラリー風）
  */
 const viewMode = ref('list');
+
+/**
+ * モバイル向けタイムラインレイアウトかどうか。
+ * @type {import('vue').ComputedRef<boolean>}
+ */
 const { isMobile: isMobileTimeline } = useMobileLayout();
 
-/** グリッド表示時は余白を詰める */
+/**
+ * グリッド表示時に余白を詰めるかどうか。
+ * `v-row` の `dense` 判定に利用する。
+ *
+ * @type {import('vue').ComputedRef<boolean>}
+ */
 const isDense = computed(() => viewMode.value === 'grid');
+
+/**
+ * 投稿カード一覧の列数設定。
+ * リスト表示では常に 1 列、グリッド表示では
+ * モバイル 2 列、`md` 以上で 3 列にする。
+ *
+ * @type {import('vue').ComputedRef<{ cols: number, sm: number, md: number }>}
+ */
 const gridColumnConfig = computed(() => {
   return isDense.value ?
     { cols: 6, sm: 6, md: 4 } :
@@ -40,15 +61,27 @@ const gridColumnConfig = computed(() => {
 
 // --- 関数 (Methods) ---
 
-/** 投稿詳細モーダルを開く */
+/**
+ * 投稿詳細モーダルを開く。
+ *
+ * @param {Object} post - 表示対象の投稿オブジェクト
+ */
 const openDetail = (post) => { selectedPost.value = post; };
 
-/** 投稿詳細モーダルを閉じる */
+/**
+ * 投稿詳細モーダルを閉じる。
+ */
 const closeDetail = () => { selectedPost.value = null; };
 
+/**
+ * 無限スクロール監視対象の DOM 要素。
+ * @type {import('vue').Ref<HTMLElement|null>}
+ */
 const scrollObserver = ref(null);
 
-/** 無限スクロールロジック */
+/**
+ * タイムライン一覧の無限スクロール状態と制御関数。
+ */
 const { items: posts, isLoading, hasMore, observe, reset } =
   useInfiniteScroll(async (lastId, pageSize) => {
     return await postService.fetchTimeline(lastId, pageSize);
