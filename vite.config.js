@@ -23,14 +23,16 @@ export default defineConfig(({ command, mode }) => {
         '@': fileURLToPath(new URL('./src', import.meta.url)),
       },
     },
-    server: {
+    server: isDev ? {
+      origin: 'http://localhost:5173',
+      strictPort: true,
       proxy: {
         '/api': {
           target: 'http://localhost:8080',
           changeOrigin: true,
         },
       },
-    },
+    } : undefined,
     build: {
       manifest: 'manifest.json',
       rollupOptions: {
