@@ -1,9 +1,11 @@
 <script setup>
 import Header from '@/components/layout/Header.vue';
+import { useMobileLayout } from '@/composables/useMobileLayout';
 
 /**
  * 共通2カラムレイアウト
  */
+const { isMobile: isMobileLayout } = useMobileLayout();
 </script>
 
 <template>
@@ -11,8 +13,8 @@ import Header from '@/components/layout/Header.vue';
     <Header />
 
     <v-main class="bg-grey-lighten-4">
-      <v-container class="py-6">
-        <v-row>
+      <v-container class="py-4 py-md-6">
+        <v-row class="align-start">
           <!-- メインカラム (左) -->
           <v-col cols="12" md="8">
             <!-- ヘッダーエリア -->
@@ -20,10 +22,15 @@ import Header from '@/components/layout/Header.vue';
 
             <!-- メインコンテンツ -->
             <slot name="main"></slot>
+
+            <!-- モバイル用サイドバー -->
+            <div v-if="isMobileLayout" class="mt-6">
+              <slot name="sidebar"></slot>
+            </div>
           </v-col>
 
           <!-- サイドバーカラム (右) -->
-          <v-col cols="12" md="4" class="hidden-sm-and-down">
+          <v-col v-if="!isMobileLayout" cols="12" md="4">
             <slot name="sidebar"></slot>
           </v-col>
         </v-row>
