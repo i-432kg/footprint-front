@@ -1,5 +1,6 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue';
+import { useMobileLayout } from '@/composables/useMobileLayout';
 import { useInfiniteScroll } from '@/composables/useInfiniteScroll';
 import postService from "@/services/postService.js";
 
@@ -27,9 +28,15 @@ const selectedPost = ref(null);
  * 'grid': 画像をタイル状に並べて表示（ギャラリー風）
  */
 const viewMode = ref('list');
+const { isMobile: isMobileTimeline } = useMobileLayout();
 
 /** グリッド表示時は余白を詰める */
 const isDense = computed(() => viewMode.value === 'grid');
+const gridColumnConfig = computed(() => {
+  return isDense.value ?
+    { cols: 6, sm: 6, md: 4 } :
+    { cols: 12, sm: 12, md: 12 };
+});
 
 // --- 関数 (Methods) ---
 
@@ -68,11 +75,22 @@ const refreshPosts = () => {
   <TwoColumnLayout>
     <!-- メインヘッダーエリア -->
     <template #header>
-      <v-card variant="flat" class="bg-transparent mb-6">
-        <v-row align="center" no-gutters>
-          <h2 class="text-h5 font-weight-bold">タイムライン</h2>
-          <v-spacer></v-spacer>
-          <v-btn-toggle v-model="viewMode" mandatory color="primary" density="compact" variant="outlined">
+      <v-card variant="flat" class="bg-transparent mb-4 mb-md-6">
+        <v-row
+          no-gutters
+          :align="isMobileTimeline ? 'start' : 'center'"
+          :class="isMobileTimeline ? 'flex-column gap-3' : ''"
+        >
+          <h2 class="text-h5 font-weight-bold mb-0">タイムライン</h2>
+          <v-spacer v-if="!isMobileTimeline"></v-spacer>
+          <v-btn-toggle
+            v-model="viewMode"
+            mandatory
+            color="primary"
+            density="compact"
+            variant="outlined"
+            :class="isMobileTimeline ? 'w-100' : ''"
+          >
             <v-btn value="list" icon="mdi-view-list"></v-btn>
             <v-btn value="grid" icon="mdi-view-grid"></v-btn>
           </v-btn-toggle>
@@ -87,8 +105,9 @@ const refreshPosts = () => {
         <v-col
           v-for="post in posts"
           :key="post.id"
-          :cols="isDense ? 4 : 12"
-          :sm="isDense ? 3 : 12"
+          :cols="gridColumnConfig.cols"
+          :sm="gridColumnConfig.sm"
+          :md="gridColumnConfig.md"
         >
           <PostCard :post="post" :viewMode="viewMode" @click="openDetail" />
         </v-col>
