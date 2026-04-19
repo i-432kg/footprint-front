@@ -8,6 +8,7 @@ import vueDevTools from 'vite-plugin-vue-devtools'
 import devtoolsJson from 'vite-plugin-devtools-json'
 
 export default defineConfig(({ command, mode }) => {
+  const rootDir = fileURLToPath(new URL('.', import.meta.url))
 
   const isDev = command === 'serve' || mode === 'development'
 
@@ -37,11 +38,11 @@ export default defineConfig(({ command, mode }) => {
       manifest: 'manifest.json',
       rollupOptions: {
         input: {
-          login: resolve(__dirname, 'src/entries/login/main.js'),
-          map: resolve(__dirname, 'src/entries/map/main.js'),
-          mypage: resolve(__dirname, 'src/entries/mypage/main.js'),
-          search: resolve(__dirname, 'src/entries/search/main.js'),
-          timeline: resolve(__dirname, 'src/entries/timeline/main.js'),
+          login: resolve(rootDir, 'src/entries/login/main.js'),
+          map: resolve(rootDir, 'src/entries/map/main.js'),
+          mypage: resolve(rootDir, 'src/entries/mypage/main.js'),
+          search: resolve(rootDir, 'src/entries/search/main.js'),
+          timeline: resolve(rootDir, 'src/entries/timeline/main.js'),
         },
         output: {
           entryFileNames: 'assets/[name].js',
