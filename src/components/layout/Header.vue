@@ -5,22 +5,48 @@ import { uiLogger } from '@/utils/logger';
 import { LOG_EVENTS } from '@/constants/logEvents';
 
 /**
- * 検索クエリ文字列
+ * ヘッダーの検索入力値。
  * @type {import('vue').Ref<string>}
  */
 const searchQuery = ref('');
+
+/**
+ * モバイル向けヘッダー表示かどうか。
+ * @type {import('vue').ComputedRef<boolean>}
+ */
 const { isMobile: isMobileHeader } = useMobileLayout();
+
+/**
+ * モバイル検索バーの開閉状態。
+ * @type {import('vue').Ref<boolean>}
+ */
 const isSearchOpen = ref(false);
+
+/**
+ * モバイルメニューの開閉状態。
+ * @type {import('vue').Ref<boolean>}
+ */
 const isMenuOpen = ref(false);
 
 /**
- * 現在のブラウザパス（アクティブなリンクの判定に使用）
+ * 現在のブラウザパス。
+ * ナビゲーションのアクティブ状態判定に利用する。
+ *
  * @type {import('vue').Ref<string>}
  */
 const currentPath = ref(typeof window !== 'undefined' ? window.location.pathname : '');
 
 /**
- * 検索を実行し、検索結果ページへ遷移する
+ * ヘッダーに表示する主要ナビゲーション定義。
+ * @type {{ title: string, href: string, icon: string, activePrefix: string }[]}
+ */
+const navigationItems = [
+  { title: 'Maps', href: '/map', icon: 'mdi-map-outline', activePrefix: '/map' },
+  { title: 'TL', href: '/timeline', icon: 'mdi-format-list-bulleted', activePrefix: '/timeline' },
+];
+
+/**
+ * 検索を実行して検索結果ページへ遷移する。
  */
 const search = () => {
   const query = (searchQuery.value || '').trim();
@@ -36,11 +62,10 @@ const search = () => {
   window.location.href = `/search?${params.toString()}`;
 };
 
-const navigationItems = [
-  { title: 'Maps', href: '/map', icon: 'mdi-map-outline', activePrefix: '/map' },
-  { title: 'TL', href: '/timeline', icon: 'mdi-format-list-bulleted', activePrefix: '/timeline' },
-];
-
+/**
+ * モバイル検索バーの開閉を切り替える。
+ * 検索バーを開く際はメニューを閉じる。
+ */
 const toggleMobileSearch = () => {
   isSearchOpen.value = !isSearchOpen.value;
 

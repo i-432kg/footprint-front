@@ -3,7 +3,17 @@ import Header from '@/components/layout/Header.vue';
 import { useMobileLayout } from '@/composables/useMobileLayout';
 
 /**
- * 共通2カラムレイアウト
+ * 共通2カラムレイアウト。
+ *
+ * PC ではメインカラムとサイドバーを横並びにし、
+ * モバイルでは 1 カラム化してサイドバーをメイン下へ再配置する。
+ */
+
+/**
+ * モバイル向けレイアウトかどうか。
+ * `true` の場合はサイドバーを右カラムではなくメイン下に表示する。
+ *
+ * @type {import('vue').ComputedRef<boolean>}
  */
 const { isMobile: isMobileLayout } = useMobileLayout();
 </script>
