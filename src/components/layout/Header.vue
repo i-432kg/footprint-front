@@ -82,7 +82,14 @@ onMounted(() => {
 
 <template>
   <div class="header-shell">
-    <v-app-bar color="white" flat border density="compact" class="px-2 px-md-4">
+    <v-app-bar
+      color="white"
+      flat
+      border
+      density="compact"
+      class="px-2 px-md-4"
+      :extension-height="isMobileHeader && isSearchOpen ? 64 : 0"
+    >
       <!-- ロゴ -->
       <v-app-bar-title class="flex-shrink-0" style="min-width: 0;">
         <v-btn variant="plain" href="/" class="text-h6 font-weight-bold text-primary pa-0">
@@ -129,6 +136,7 @@ onMounted(() => {
         v-if="isMobileHeader"
         icon="mdi-magnify"
         title="Search"
+        aria-label="検索バーを開く"
         @click="toggleMobileSearch"
       ></v-btn>
 
@@ -138,7 +146,7 @@ onMounted(() => {
       <!-- モバイルメニュー -->
       <v-menu v-if="isMobileHeader" v-model="isMenuOpen" location="bottom end">
         <template #activator="{ props }">
-          <v-btn icon="mdi-menu" title="Menu" v-bind="props"></v-btn>
+          <v-btn icon="mdi-menu" title="Menu" aria-label="メニューを開く" v-bind="props"></v-btn>
         </template>
 
         <v-list min-width="200" density="compact">
@@ -154,28 +162,26 @@ onMounted(() => {
           </v-list-item>
         </v-list>
       </v-menu>
-    </v-app-bar>
 
-    <v-expand-transition>
-      <!-- モバイル検索バー -->
-      <v-sheet
-        v-if="isMobileHeader && isSearchOpen"
-        color="white"
-        border
-        class="px-4 pb-4"
-      >
-        <v-text-field
-          v-model="searchQuery"
-          prepend-inner-icon="mdi-magnify"
-          placeholder="キーワードで検索"
-          variant="solo-filled"
-          flat
-          hide-details
-          rounded="pill"
-          density="comfortable"
-          @keydown.enter="search"
-        ></v-text-field>
-      </v-sheet>
-    </v-expand-transition>
+      <template v-if="isMobileHeader && isSearchOpen" #extension>
+        <v-expand-transition>
+          <!-- モバイル検索バー -->
+          <v-sheet color="white" class="w-100 px-4 pb-3 pt-1">
+            <v-text-field
+              v-model="searchQuery"
+              prepend-inner-icon="mdi-magnify"
+              placeholder="キーワードで検索"
+              variant="solo-filled"
+              flat
+              hide-details
+              rounded="pill"
+              density="compact"
+              autofocus
+              @keydown.enter="search"
+            ></v-text-field>
+          </v-sheet>
+        </v-expand-transition>
+      </template>
+    </v-app-bar>
   </div>
 </template>
