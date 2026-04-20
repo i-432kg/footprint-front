@@ -1,5 +1,6 @@
 <script setup>
 import { ref, reactive, computed } from 'vue';
+import { useMobileLayout } from '@/composables/useMobileLayout';
 import { rules as commonRules } from '@/utils/validationRules';
 import { uiLogger } from '@/utils/logger';
 import { VALIDATION_MESSAGES } from '@/constants/validationMessages';
@@ -9,7 +10,7 @@ import userService from "@/services/userService.js";
 /**
  * @property {boolean} modelValue - モーダルの表示状態（v-model）
  */
-const props = defineProps({
+defineProps({
   modelValue: { type: Boolean, required: true }
 });
 
@@ -18,6 +19,12 @@ const props = defineProps({
  * @event registered - 登録完了時に発火
  */
 const emit = defineEmits(['update:modelValue', 'registered']);
+
+/**
+ * モバイル向け登録モーダル表示かどうか。
+ * @type {import('vue').ComputedRef<boolean>}
+ */
+const { isMobile: isMobileRegister } = useMobileLayout();
 
 /** 登録ステップの定義 */
 const STEPS = {
@@ -133,13 +140,22 @@ const closeModal = () => {
 </script>
 
 <template>
-  <v-dialog :model-value="modelValue" max-width="500" persistent @update:model-value="closeModal">
-    <v-card rounded="xl">
-      <v-card-title class="pa-6 text-h5 font-weight-bold">
+  <v-dialog
+    :model-value="modelValue"
+    :fullscreen="isMobileRegister"
+    max-width="500"
+    persistent
+    @update:model-value="closeModal"
+  >
+    <v-card :rounded="isMobileRegister ? false : 'xl'">
+      <v-card-title
+        class="text-h5 font-weight-bold"
+        :class="isMobileRegister ? 'px-4 py-5' : 'pa-6'"
+      >
         {{ isInputStep ? 'アカウント作成' : '登録内容の確認' }}
       </v-card-title>
 
-      <v-card-text class="pa-6 pt-0">
+      <v-card-text :class="isMobileRegister ? 'px-4 pb-4 pt-0' : 'pa-6 pt-0'">
         <v-form ref="form" v-model="isValid" @submit.prevent="nextStep">
           <v-window v-model="step">
             <!-- ステップ1: 入力 -->
@@ -198,7 +214,7 @@ const closeModal = () => {
         </v-form>
       </v-card-text>
 
-      <v-card-actions class="pa-6 pt-0">
+      <v-card-actions :class="isMobileRegister ? 'px-4 pb-4 pt-0' : 'pa-6 pt-0'">
         <v-btn
           variant="text"
           color="grey-darken-1"
