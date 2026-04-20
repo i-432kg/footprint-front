@@ -1,5 +1,6 @@
 <script setup>
 import { ref, computed } from 'vue';
+import { useMobileLayout } from '@/composables/useMobileLayout';
 import { useUserStore } from '@/stores/userStore';
 import { uiLogger } from '@/utils/logger';
 import { rules as commonRules } from '@/utils/validationRules';
@@ -20,6 +21,14 @@ import postService from '@/services/postService';
 const emit = defineEmits(['submitted']);
 
 const userStore = useUserStore();
+
+/**
+ * モバイル向け投稿導線かどうか。
+ * `true` の場合は右下 FAB から投稿モーダルを開く。
+ *
+ * @type {import('vue').ComputedRef<boolean>}
+ */
+const { isMobile: isMobileActions } = useMobileLayout();
 
 /** ログイン中のユーザー名 */
 const username = computed(() => userStore.username);
@@ -150,7 +159,7 @@ const closeModal = () => {
 
 <template>
   <!-- プロフィールカード -->
-  <v-card class="pa-4 rounded-xl mb-4" border flat>
+  <v-card v-if="!isMobileActions" class="pa-4 rounded-xl mb-4" border flat>
     <v-list-item class="px-0">
       <template v-slot:prepend>
         <v-avatar color="primary" class="text-white">{{ username.charAt(0) }}</v-avatar>
@@ -168,12 +177,33 @@ const closeModal = () => {
     </v-btn>
   </v-card>
 
+  <!-- モバイル用投稿FAB -->
+  <v-btn
+    v-if="isMobileActions && !showModal"
+    class="post-fab"
+    color="primary"
+    icon="mdi-plus"
+    size="large"
+    elevation="8"
+    aria-label="新規投稿を作成"
+    @click="openModal"
+  ></v-btn>
+
   <!-- 新規投稿モーダル -->
-  <v-dialog v-model="showModal" max-width="500">
-    <v-card rounded="xl">
-      <v-card-title class="font-weight-bold pa-4">新規投稿</v-card-title>
+  <v-dialog
+    v-model="showModal"
+    :fullscreen="isMobileActions"
+    max-width="500"
+  >
+    <v-card :rounded="isMobileActions ? false : 'xl'">
+      <v-card-title
+        class="font-weight-bold"
+        :class="isMobileActions ? 'px-4 py-5' : 'pa-4'"
+      >
+        新規投稿
+      </v-card-title>
       <v-divider></v-divider>
-      <v-card-text class="pa-4">
+      <v-card-text :class="isMobileActions ? 'px-4 py-4' : 'pa-4'">
         <v-form ref="form" v-model="isValid">
           <!-- 画像選択エリア -->
           <v-file-input
@@ -216,7 +246,7 @@ const closeModal = () => {
       </v-card-text>
 
       <!-- フッター -->
-      <v-card-actions class="pa-4">
+      <v-card-actions :class="isMobileActions ? 'px-4 pb-4 pt-0' : 'pa-4'">
         <v-btn variant="text" rounded="pill" @click="closeModal">キャンセル</v-btn>
         <v-spacer></v-spacer>
         <v-btn
@@ -233,3 +263,12 @@ const closeModal = () => {
     </v-card>
   </v-dialog>
 </template>
+
+<style scoped>
+.post-fab {
+  position: fixed;
+  right: 20px;
+  bottom: calc(24px + env(safe-area-inset-bottom));
+  z-index: 1000;
+}
+</style>
