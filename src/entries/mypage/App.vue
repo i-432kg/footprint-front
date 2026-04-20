@@ -1,5 +1,6 @@
 <script setup>
 import { ref, onMounted } from 'vue';
+import { useMobileLayout } from '@/composables/useMobileLayout';
 import { useDateFormatter } from "@/composables/useDateFormatter.js";
 import userService from "@/services/userService.js";
 
@@ -7,6 +8,12 @@ import TheHeader from '@/components/layout/Header.vue';
 import PostDetailModal from '@/components/post/detail/PostDetailModal.vue';
 
 const { formatDate } = useDateFormatter();
+
+/**
+ * モバイル向けマイページレイアウトかどうか。
+ * @type {import('vue').ComputedRef<boolean>}
+ */
+const { isMobile: isMobileMypage } = useMobileLayout();
 
 /** 定数 */
 const PAGE_SIZE = 6;
@@ -107,20 +114,36 @@ onMounted(async () => {
     <TheHeader />
 
     <v-main class="bg-grey-lighten-4">
-      <v-container class="py-10" style="max-width: 900px;">
+      <v-container class="px-4 py-5 py-md-10" style="max-width: 900px;">
 
         <!-- プロフィールセクション -->
-        <v-row align="center" class="mb-8">
+        <v-row
+          align="center"
+          :class="isMobileMypage ? 'mb-6' : 'mb-8'"
+          :dense="isMobileMypage"
+        >
           <v-col cols="auto">
-            <v-avatar color="primary" size="80" class="text-h4 text-white">
+            <v-avatar
+              color="primary"
+              :size="isMobileMypage ? 64 : 80"
+              class="text-h4 text-white"
+            >
               <v-img v-if="user.avatarUrl" :src="user.avatarUrl"></v-img>
               <span v-else>{{ user?.username?.charAt(0) || '?' }}</span>
             </v-avatar>
           </v-col>
           <v-col>
-            <h1 class="text-h4 font-weight-bold mb-2">{{ user.username || '読み込み中...' }}</h1>
-            <div class="text-subtitle-1 text-medium-emphasis">
-              <span class="mr-6"><strong>{{ user.postCount }}</strong> 投稿</span>
+            <h1
+              class="font-weight-bold mb-2 text-break"
+              :class="isMobileMypage ? 'text-h5' : 'text-h4'"
+            >
+              {{ user.username || '読み込み中...' }}
+            </h1>
+            <div
+              class="text-medium-emphasis"
+              :class="isMobileMypage ? 'text-body-2' : 'text-subtitle-1'"
+            >
+              <span class="mr-4 mr-md-6"><strong>{{ user.postCount }}</strong> 投稿</span>
               <span><strong>{{ user.replyCount }}</strong> 返信</span>
             </div>
           </v-col>
@@ -135,21 +158,27 @@ onMounted(async () => {
 
           <v-divider></v-divider>
 
-          <v-card-text class="pa-6">
+          <v-card-text :class="isMobileMypage ? 'pa-3' : 'pa-6'">
             <v-window v-model="activeTab">
 
               <!-- 投稿一覧タブ -->
               <v-window-item value="posts">
-                <div v-if="myPosts.length === 0 && !isPostsLoading" class="text-center py-10 text-grey">
+                <div
+                  v-if="myPosts.length === 0 && !isPostsLoading"
+                  class="text-center text-grey"
+                  :class="isMobileMypage ? 'py-6' : 'py-10'"
+                >
                   まだ投稿がありません。
                 </div>
-                <v-row v-else>
+                <v-row v-else :dense="isMobileMypage">
                   <v-col
                     v-for="post in myPosts"
                     :key="post.id"
-                    cols="12" sm="6" md="4"
+                    :cols="isMobileMypage ? 6 : 12"
+                    sm="6"
+                    md="4"
                   >
-                    <v-card hover @click="openDetail(post)">
+                    <v-card hover rounded="lg" class="overflow-hidden" @click="openDetail(post)">
                       <v-img
                         v-if="post.mainImageUrl"
                         :src="post.mainImageUrl"
@@ -157,7 +186,7 @@ onMounted(async () => {
                         aspect-ratio="1"
                         cover
                       ></v-img>
-                      <v-card-subtitle class="py-2 text-caption">
+                      <v-card-subtitle class="py-2 px-2 text-caption">
                         {{ formatDate(post.createdAt) }}
                       </v-card-subtitle>
                     </v-card>
@@ -173,6 +202,7 @@ onMounted(async () => {
                     :loading="isPostsLoading"
                     @click="loadMorePosts"
                     prepend-icon="mdi-plus"
+                    :block="isMobileMypage"
                   >
                     もっと読み込む
                   </v-btn>
@@ -184,14 +214,23 @@ onMounted(async () => {
 
               <!-- コメント一覧タブ -->
               <v-window-item value="comments">
-                <div v-if="myComments.length === 0 && !isCommentsLoading" class="text-center py-10 text-grey">
+                <div
+                  v-if="myComments.length === 0 && !isCommentsLoading"
+                  class="text-center text-grey"
+                  :class="isMobileMypage ? 'py-6' : 'py-10'"
+                >
                   まだ返信がありません。
                 </div>
-                <v-list v-else lines="two" class="bg-transparent">
+                <v-list
+                  v-else
+                  :lines="isMobileMypage ? 'three' : 'two'"
+                  class="bg-transparent pa-0"
+                >
                   <v-list-item
                     v-for="comment in myComments"
                     :key="comment.id"
-                    class="mb-4 border rounded-lg bg-white"
+                    class="mb-3 mb-md-4 border rounded-lg bg-white"
+                    :density="isMobileMypage ? 'compact' : 'default'"
                   >
                     <v-list-item-title class="text-subtitle-2 font-weight-bold">
                       投稿 ID: {{ comment.postId }}
@@ -199,7 +238,7 @@ onMounted(async () => {
                     <v-list-item-subtitle class="text-caption mb-2">
                       {{ formatDate(comment.createdAt) }}
                     </v-list-item-subtitle>
-                    <p class="text-body-2">{{ comment.message }}</p>
+                    <p class="text-body-2 text-break mb-0">{{ comment.message }}</p>
                   </v-list-item>
                 </v-list>
 
@@ -212,6 +251,7 @@ onMounted(async () => {
                     :loading="isCommentsLoading"
                     @click="loadMoreComments"
                     prepend-icon="mdi-plus"
+                    :block="isMobileMypage"
                   >
                     もっと読み込む
                   </v-btn>
@@ -231,7 +271,3 @@ onMounted(async () => {
     <PostDetailModal v-if="selectedPost" :post="selectedPost" @close="closeDetail" />
   </v-app>
 </template>
-
-<style scoped>
-
-</style>
