@@ -1,5 +1,6 @@
 <script setup>
 import { ref, onMounted } from 'vue';
+import { useMobileLayout } from '@/composables/useMobileLayout';
 import { rules as commonRules } from '@/utils/validationRules';
 import { uiLogger } from '@/utils/logger';
 import { LOG_EVENTS } from '@/constants/logEvents';
@@ -25,6 +26,12 @@ const props = defineProps({
  * - submitted: 返信の投稿が成功
  */
 const emit = defineEmits(['close', 'submitted']);
+
+/**
+ * モバイル向け返信モーダル表示かどうか。
+ * @type {import('vue').ComputedRef<boolean>}
+ */
+const { isMobile: isMobileReply } = useMobileLayout();
 
 // 入力欄の内容
 const replyMessage = ref('');
@@ -107,18 +114,25 @@ onMounted(() => {
 <template>
   <v-dialog
     v-model="dialog"
+    :fullscreen="isMobileReply"
     max-width="500"
     persistent
     @update:model-value="updateDialog"
   >
-    <v-card rounded="xl" class="pa-2">
+    <v-card
+      :rounded="isMobileReply ? false : 'xl'"
+      :class="isMobileReply ? '' : 'pa-2'"
+    >
       <!-- ヘッダー -->
-      <v-card-title class="text-h6 font-weight-bold">
+      <v-card-title
+        class="text-h6 font-weight-bold"
+        :class="isMobileReply ? 'px-4 py-5' : ''"
+      >
         返信を投稿
       </v-card-title>
 
       <!-- 入力欄 -->
-      <v-card-text>
+      <v-card-text :class="isMobileReply ? 'px-4 py-4' : ''">
         <v-form ref="form" v-model="isValid">
           <v-textarea
             v-model="replyMessage"
@@ -134,13 +148,12 @@ onMounted(() => {
             color="primary"
             class="rounded-lg"
             :disabled="isSubmitting"
-            counter
           ></v-textarea>
         </v-form>
       </v-card-text>
 
       <!-- フッター -->
-      <v-card-actions class="pa-4">
+      <v-card-actions :class="isMobileReply ? 'px-4 pb-4 pt-0' : 'pa-4'">
         <v-btn
           variant="text"
           color="grey-darken-1"

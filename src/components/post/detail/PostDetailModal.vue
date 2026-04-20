@@ -1,5 +1,6 @@
 <script setup>
 import { onMounted, ref } from "vue";
+import { useMobileLayout } from '@/composables/useMobileLayout';
 import { useReplyStore } from '@/stores/replyStore.js';
 import postService from '@/services/postService.js';
 import { uiLogger } from '@/utils/logger';
@@ -10,6 +11,12 @@ import PostDetailContent from "./PostDetailContent.vue";
 import CommentThread from "./CommentThread.vue";
 
 const replyStore = useReplyStore();
+
+/**
+ * モバイル向け投稿詳細モーダル表示かどうか。
+ * @type {import('vue').ComputedRef<boolean>}
+ */
+const { isMobile: isMobileDetail } = useMobileLayout();
 
 /** 詳細を表示する投稿 */
 const props = defineProps({
@@ -120,13 +127,17 @@ onMounted(async () => {
 <template>
   <v-dialog
     v-model="dialog"
+    :fullscreen="isMobileDetail"
     max-width="600"
     scrollable
     @update:model-value="updateDialog"
   >
-    <v-card rounded="xl">
+    <v-card :rounded="isMobileDetail ? false : 'xl'">
       <!-- ヘッダー -->
-      <v-card-title class="d-flex align-center justify-space-between pa-4">
+      <v-card-title
+        class="d-flex align-center justify-space-between"
+        :class="isMobileDetail ? 'px-4 py-5' : 'pa-4'"
+      >
         <span class="text-h6 font-weight-bold">投稿詳細</span>
         <v-chip v-if="isLoading" size="small" color="primary" variant="tonal">更新中...</v-chip>
       </v-card-title>
@@ -135,7 +146,7 @@ onMounted(async () => {
 
       <!-- コンテンツ部分 -->
       <v-card-text class="pa-0">
-        <v-container class="pa-4">
+        <v-container :class="isMobileDetail ? 'px-4 py-4' : 'pa-4'">
           <!-- 投稿本体 -->
           <PostDetailContent :post="detailedPost" @reply="openReplyModal(null)" />
 
@@ -149,7 +160,7 @@ onMounted(async () => {
       <v-divider></v-divider>
 
       <!-- フッター -->
-      <v-card-actions class="pa-4">
+      <v-card-actions :class="isMobileDetail ? 'px-4 pb-4 pt-0' : 'pa-4'">
         <v-spacer></v-spacer>
         <v-btn
           color="grey-darken-1"
