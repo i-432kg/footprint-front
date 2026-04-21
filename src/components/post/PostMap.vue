@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted, ref, createApp } from 'vue';
+import { onMounted, ref, shallowRef, markRaw, createApp } from 'vue';
 import { useMobileLayout } from '@/composables/useMobileLayout';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -35,12 +35,15 @@ const customIcon = L.icon({
 });
 
 const mapContainer = ref(null);
-const map = ref(null);
+const map = shallowRef(null);
 const posts = ref([]);
-const markers = ref([]);
+const markers = shallowRef([]);
 const selectedPost = ref(null);
 const isModalOpen = ref(false);
-const zoomControl = ref(null);
+const zoomControl = shallowRef(null);
+const hasMoved = ref(false);
+const isFetching = ref(false);
+const latestRequestId = ref(0);
 
 const openDetail = (post) => {
   selectedPost.value = post;
@@ -53,6 +56,10 @@ const openDetail = (post) => {
 const fetchPosts = async () => {
   if (!map.value) return;
 
+  const requestId = latestRequestId.value + 1;
+  latestRequestId.value = requestId;
+  isFetching.value = true;
+
   try {
     const bounds = map.value.getBounds();
     const minLat = bounds.getSouth();
@@ -61,12 +68,22 @@ const fetchPosts = async () => {
     const maxLng = bounds.getEast();
 
     // 地図検索APIを呼び出し
-    posts.value = await postService.searchMap(minLat, maxLat, minLng, maxLng);
+    const fetchedPosts = await postService.searchMap(minLat, maxLat, minLng, maxLng);
+
+    // 古いリクエストの結果は現在の地図表示に反映しない
+    if (requestId !== latestRequestId.value) return;
+
+    posts.value = fetchedPosts;
 
     // 取得した投稿を地図に描画
     renderMarkers();
+    hasMoved.value = false;
   } catch (error) {
     console.error('投稿の取得に失敗しました:', error);
+  } finally {
+    if (requestId === latestRequestId.value) {
+      isFetching.value = false;
+    }
   }
 };
 
@@ -90,7 +107,14 @@ const handleMoveEnd = () => {
     }
   });
 
-  // 移動が終わるたびに範囲内の投稿を再取得
+  // API は自動実行せず、ユーザーに再検索の判断を委ねる
+  hasMoved.value = true;
+};
+
+/**
+ * 現在表示している地図範囲で投稿を再検索する
+ */
+const searchCurrentArea = () => {
   fetchPosts();
 };
 
@@ -103,8 +127,10 @@ const renderMarkers = () => {
 
   posts.value.forEach(post => {
     if (post.hasLocation) {
-      const marker = L.marker([post.location.lat, post.location.lng], { icon: customIcon })
-        .addTo(map.value);
+      const marker = markRaw(
+        L.marker([post.location.lat, post.location.lng], { icon: customIcon })
+          .addTo(map.value)
+      );
 
       // 後で削除できるように配列に保持
       markers.value.push(marker);
@@ -138,13 +164,17 @@ onMounted(() => {
     const initialZoom = 12; // 都道府県〜市区町村くらいの拡大倍率
 
     // 地図の初期インスタンス作成
-    map.value = L.map(mapContainer.value, {
-      zoomControl: false
-    });
+    map.value = markRaw(
+      L.map(mapContainer.value, {
+        zoomControl: false
+      })
+    );
 
-    zoomControl.value = L.control.zoom({
-      position: isMobileMap.value ? 'bottomright' : 'topleft'
-    }).addTo(map.value);
+    zoomControl.value = markRaw(
+      L.control.zoom({
+        position: isMobileMap.value ? 'bottomright' : 'topleft'
+      }).addTo(map.value)
+    );
 
     // タイルレイヤーの追加
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -194,6 +224,20 @@ onMounted(() => {
     <!-- 投稿マップ -->
     <div ref="mapContainer" class="leaflet-map"></div>
 
+    <!-- エリア再検索ボタン -->
+    <v-btn
+      v-if="hasMoved"
+      class="map-search-button"
+      color="primary"
+      rounded="pill"
+      elevation="6"
+      prepend-icon="mdi-refresh"
+      :loading="isFetching"
+      @click="searchCurrentArea"
+    >
+      このエリアで再検索
+    </v-btn>
+
     <!-- 投稿詳細モーダル -->
     <PostDetailModal
       v-if="isModalOpen"
@@ -216,6 +260,15 @@ onMounted(() => {
   width: 100%;
   height: 100%;
   z-index: 1;
+}
+
+.map-search-button {
+  position: absolute;
+  top: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 500;
+  white-space: nowrap;
 }
 
 /* モーダルが地図の背面に隠れないように z-index を調整 */
