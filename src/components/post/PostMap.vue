@@ -18,12 +18,18 @@ import PostDetailModal from './detail/PostDetailModal.vue';
  */
 const { isMobile: isMobileMap } = useMobileLayout();
 
-// 404エラー対策 new URL として読み込む
+/**
+ * Leaflet 標準マーカー画像の URL。
+ * Vite で画像を解決できるように `new URL()` 経由で参照する。
+ */
 const markerIcon = new URL('leaflet/dist/images/marker-icon.png', import.meta.url).href;
 const markerIcon2x = new URL('leaflet/dist/images/marker-icon-2x.png', import.meta.url).href;
 const markerShadow = new URL('leaflet/dist/images/marker-shadow.png', import.meta.url).href;
 
-// 404エラー対策 独自のアイコン定義にする
+/**
+ * Leaflet マーカー用のカスタムアイコン定義。
+ * @type {import('leaflet').Icon}
+ */
 const customIcon = L.icon({
   iconUrl: markerIcon,
   iconRetinaUrl: markerIcon2x,
@@ -34,24 +40,90 @@ const customIcon = L.icon({
   shadowSize: [41, 41]
 });
 
+/**
+ * Leaflet の地図をマウントする DOM 要素。
+ * @type {import('vue').Ref<HTMLElement|null>}
+ */
 const mapContainer = ref(null);
+
+/**
+ * Leaflet の地図インスタンス。
+ * 外部クラスの深い Proxy 化を避けるため `shallowRef` と `markRaw` で扱う。
+ *
+ * @type {import('vue').ShallowRef<import('leaflet').Map|null>}
+ */
 const map = shallowRef(null);
+
+/**
+ * 現在表示中の投稿一覧。
+ * @type {import('vue').Ref<Object[]>}
+ */
 const posts = ref([]);
+
+/**
+ * 地図上に描画している Leaflet マーカー一覧。
+ * 外部クラスの深い Proxy 化を避けるため `shallowRef` と `markRaw` で扱う。
+ *
+ * @type {import('vue').ShallowRef<import('leaflet').Marker[]>}
+ */
 const markers = shallowRef([]);
+
+/**
+ * 投稿詳細モーダルで表示する投稿。
+ * @type {import('vue').Ref<Object|null>}
+ */
 const selectedPost = ref(null);
+
+/**
+ * 投稿詳細モーダルの表示状態。
+ * @type {import('vue').Ref<boolean>}
+ */
 const isModalOpen = ref(false);
+
+/**
+ * Leaflet のズームコントロール。
+ * @type {import('vue').ShallowRef<import('leaflet').Control.Zoom|null>}
+ */
 const zoomControl = shallowRef(null);
+
+/**
+ * 最後に投稿取得した範囲から、地図の表示範囲が変更されたかどうか。
+ * `true` の場合は「このエリアで再検索」ボタンを表示する。
+ *
+ * @type {import('vue').Ref<boolean>}
+ */
 const hasMoved = ref(false);
+
+/**
+ * 地図範囲に基づく投稿取得中かどうか。
+ * @type {import('vue').Ref<boolean>}
+ */
 const isFetching = ref(false);
+
+/**
+ * 投稿取得リクエストの最新 ID。
+ * 古いレスポンスを地図へ反映しないために利用する。
+ *
+ * @type {import('vue').Ref<number>}
+ */
 const latestRequestId = ref(0);
 
+/**
+ * 投稿詳細モーダルを開く。
+ *
+ * @param {Object} post - 表示対象の投稿オブジェクト
+ */
 const openDetail = (post) => {
   selectedPost.value = post;
   isModalOpen.value = true;
 };
 
 /**
- * 地図の表示範囲に基づいて投稿を取得する
+ * 現在の地図表示範囲に基づいて投稿を取得し、マーカーを再描画する。
+ * 古いリクエストのレスポンスは描画に反映しない。
+ *
+ * @async
+ * @returns {Promise<void>}
  */
 const fetchPosts = async () => {
   if (!map.value) return;
@@ -88,7 +160,8 @@ const fetchPosts = async () => {
 };
 
 /**
- * 地図の移動・ズーム終了時のハンドリング
+ * 地図の移動・ズーム終了時のハンドリング。
+ * API は呼ばず、表示範囲が変更されたことだけを記録する。
  */
 const handleMoveEnd = () => {
   if (!map.value) return;
@@ -112,12 +185,16 @@ const handleMoveEnd = () => {
 };
 
 /**
- * 現在表示している地図範囲で投稿を再検索する
+ * 現在表示している地図範囲で投稿を再検索する。
  */
 const searchCurrentArea = () => {
   fetchPosts();
 };
 
+/**
+ * 現在の投稿一覧を Leaflet マーカーとして地図へ描画する。
+ * 既存マーカーは削除し、投稿一覧に基づいて作り直す。
+ */
 const renderMarkers = () => {
   if (!map.value) return;
 
