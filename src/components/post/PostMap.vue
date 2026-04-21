@@ -1,5 +1,6 @@
 <script setup>
-import { onMounted, ref, createApp, getCurrentInstance } from 'vue';
+import { onMounted, ref, createApp } from 'vue';
+import { useMobileLayout } from '@/composables/useMobileLayout';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import postService from "@/services/postService.js";
@@ -10,6 +11,12 @@ import pinia from '@/stores';
 
 import PostPopup from './PostPopup.vue';
 import PostDetailModal from './detail/PostDetailModal.vue';
+
+/**
+ * モバイル向け地図表示かどうか。
+ * @type {import('vue').ComputedRef<boolean>}
+ */
+const { isMobile: isMobileMap } = useMobileLayout();
 
 // 404エラー対策 new URL として読み込む
 const markerIcon = new URL('leaflet/dist/images/marker-icon.png', import.meta.url).href;
@@ -33,6 +40,7 @@ const posts = ref([]);
 const markers = ref([]);
 const selectedPost = ref(null);
 const isModalOpen = ref(false);
+const zoomControl = ref(null);
 
 const openDetail = (post) => {
   selectedPost.value = post;
@@ -86,9 +94,6 @@ const handleMoveEnd = () => {
   fetchPosts();
 };
 
-// 現在の Vue アプリのインスタンスを取得
-const { appContext } = getCurrentInstance();
-
 const renderMarkers = () => {
   if (!map.value) return;
 
@@ -115,8 +120,8 @@ const renderMarkers = () => {
       popupApp.mount(container);
 
       marker.bindPopup(container, {
-        maxWidth: 280,
-        minWidth: 150
+        maxWidth: isMobileMap.value ? 240 : 280,
+        minWidth: isMobileMap.value ? 180 : 150
       });
 
       marker.on('popupclose', () => {
@@ -133,7 +138,13 @@ onMounted(() => {
     const initialZoom = 12; // 都道府県〜市区町村くらいの拡大倍率
 
     // 地図の初期インスタンス作成
-    map.value = L.map(mapContainer.value);
+    map.value = L.map(mapContainer.value, {
+      zoomControl: false
+    });
+
+    zoomControl.value = L.control.zoom({
+      position: isMobileMap.value ? 'bottomright' : 'topleft'
+    }).addTo(map.value);
 
     // タイルレイヤーの追加
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -169,12 +180,17 @@ onMounted(() => {
 
     // 地図移動・ズーム終了イベントの検知を開始
     map.value.on('moveend', handleMoveEnd);
+
+    // レイアウト確定後に Leaflet の表示サイズを再計算する
+    requestAnimationFrame(() => {
+      map.value?.invalidateSize();
+    });
   }
 });
 </script>
 
 <template>
-  <v-sheet class="map-wrapper fill-height bg-grey-lighten-3">
+  <v-sheet class="map-wrapper h-100 bg-grey-lighten-3">
     <!-- 投稿マップ -->
     <div ref="mapContainer" class="leaflet-map"></div>
 
@@ -190,6 +206,7 @@ onMounted(() => {
 <style scoped>
 .map-wrapper {
   width: 100%;
+  height: 100%;
   position: relative;
   overflow: hidden;
   min-height: 500px;
