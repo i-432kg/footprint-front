@@ -183,7 +183,3 @@ onMounted(async () => {
     @submitted="handleReplySubmitted"
   />
 </template>
-
-<style scoped>
-
-</style>

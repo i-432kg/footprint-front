@@ -94,7 +94,3 @@ const onRegistered = () => {
     />
   </v-app>
 </template>
-
-<style scoped>
-
-</style>

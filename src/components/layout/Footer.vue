@@ -25,7 +25,3 @@ const currentYear = new Date().getFullYear();
     </v-container>
   </v-footer>
 </template>
-
-<style scoped>
-
-</style>
