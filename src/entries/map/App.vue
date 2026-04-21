@@ -1,12 +1,12 @@
 <script setup>
-import Header from '@/components/layout/Header.vue';
-import Footer from '@/components/layout/Footer.vue';
+import TheHeader from '@/components/layout/TheHeader.vue';
+import TheFooter from '@/components/layout/TheFooter.vue';
 import PostMap from '@/components/post/PostMap.vue';
 </script>
 
 <template>
   <v-app>
-    <Header />
+    <TheHeader />
 
     <v-main>
       <v-container fluid class="pa-0 fill-height">
@@ -15,7 +15,7 @@ import PostMap from '@/components/post/PostMap.vue';
       </v-container>
     </v-main>
 
-    <Footer />
+    <TheFooter />
   </v-app>
 </template>
 

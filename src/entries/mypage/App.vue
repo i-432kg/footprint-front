@@ -4,7 +4,7 @@ import { useMobileLayout } from '@/composables/useMobileLayout';
 import { useDateFormatter } from "@/composables/useDateFormatter.js";
 import userService from "@/services/userService.js";
 
-import TheHeader from '@/components/layout/Header.vue';
+import TheHeader from '@/components/layout/TheHeader.vue';
 import PostDetailModal from '@/components/post/detail/PostDetailModal.vue';
 
 const { formatDate } = useDateFormatter();

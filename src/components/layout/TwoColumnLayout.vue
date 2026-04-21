@@ -1,5 +1,5 @@
 <script setup>
-import Header from '@/components/layout/Header.vue';
+import TheHeader from '@/components/layout/TheHeader.vue';
 import { useMobileLayout } from '@/composables/useMobileLayout';
 
 /**
@@ -20,7 +20,7 @@ const { isMobile: isMobileLayout } = useMobileLayout();
 
 <template>
   <v-app>
-    <Header />
+    <TheHeader />
 
     <v-main class="bg-grey-lighten-4">
       <v-container class="py-4 py-md-6">
