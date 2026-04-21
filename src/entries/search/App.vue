@@ -68,7 +68,7 @@ onMounted( () => {
       <v-card variant="flat" class="bg-transparent mb-4 mb-md-6">
         <p class="text-caption text-medium-emphasis mb-1">検索結果</p>
         <h2
-          class="font-weight-bold search-title"
+          class="font-weight-bold text-break"
           :class="isMobileSearch ? 'text-h6' : 'text-h5'"
         >
           「{{ query }}」
@@ -121,9 +121,3 @@ onMounted( () => {
     </template>
   </TwoColumnLayout>
 </template>
-
-<style scoped>
-.search-title {
-  overflow-wrap: anywhere;
-}
-</style>

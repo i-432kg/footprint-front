@@ -33,15 +33,15 @@ const { isMobile: isMobileResultItem } = useMobileLayout();
         <!-- 右側：投稿詳細 -->
         <v-col :cols="post.hasImages ? 12 : 12" :sm="post.hasImages ? 8 : 12">
           <p
-            class="mb-3 search-result-caption"
+            class="mb-3 text-break"
             :class="isMobileResultItem ? 'text-body-2' : 'text-body-1'"
           >
             {{ post.caption }}
           </p>
 
           <div
-            class="text-caption text-medium-emphasis search-result-meta"
-            :class="isMobileResultItem ? 'flex-column align-start ga-1' : 'align-center'"
+            class="d-flex text-caption text-medium-emphasis"
+            :class="isMobileResultItem ? 'flex-column align-start ga-1' : 'align-center justify-space-between'"
           >
             <span v-if="post.hasLocation" class="d-inline-flex align-center">
               <v-icon size="x-small" color="primary" class="mr-1">mdi-map-marker</v-icon>
@@ -54,14 +54,3 @@ const { isMobile: isMobileResultItem } = useMobileLayout();
     </v-card-text>
   </v-card>
 </template>
-
-<style scoped>
-.search-result-caption {
-  overflow-wrap: anywhere;
-}
-
-.search-result-meta {
-  display: flex;
-  justify-content: space-between;
-}
-</style>
