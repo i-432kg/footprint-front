@@ -5,7 +5,6 @@ import { useInfiniteScroll } from '@/composables/useInfiniteScroll';
 import postService from "@/services/postService.js";
 
 import SideUserActions from '@/components/layout/SideUserActions.vue';
-import SideRecommendation from "@/components/layout/SideRecommendation.vue";
 import TwoColumnLayout from '@/components/layout/TwoColumnLayout.vue';
 import PostCard from '@/components/post/PostCard.vue';
 import PostDetailModal from '@/components/post/detail/PostDetailModal.vue';

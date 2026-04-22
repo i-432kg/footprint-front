@@ -5,7 +5,6 @@ import { useInfiniteScroll } from '@/composables/useInfiniteScroll';
 import postService from "@/services/postService.js";
 
 import SideUserActions from '@/components/layout/SideUserActions.vue';
-import SideSearchOption from "@/components/layout/SideSearchOption.vue";
 import TwoColumnLayout from '@/components/layout/TwoColumnLayout.vue';
 import SearchResultItem from '@/components/post/SearchResultItem.vue';
 import PostDetailModal from '@/components/post/detail/PostDetailModal.vue';

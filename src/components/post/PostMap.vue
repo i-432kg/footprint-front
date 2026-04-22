@@ -361,9 +361,4 @@ onBeforeUnmount(() => {
   z-index: 500;
   white-space: nowrap;
 }
-
-/* モーダルが地図の背面に隠れないように z-index を調整 */
-:deep(.v-overlay) {
-  z-index: 2000;
-}
 </style>
