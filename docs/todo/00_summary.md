@@ -6,9 +6,9 @@
 ## 一覧
 | 優先度 | 分類 | 課題 | 対象 | 状態 | 次アクション |
 | --- | --- | --- | --- | --- | --- |
-| P0 | Leaflet | ポップアップ再表示時の空白化を暫定対応する | `PostMap.vue` | 実装済み・要確認 | 同じ marker の popup を開く、閉じる、再度開く操作で中身が表示されるか確認する |
+| P0 | Leaflet | ポップアップ再表示時の空白化を暫定対応する | `PostMap.vue` | 完了 | 動作確認 OK |
 | P0 | モバイル対応 | モバイル対応状況ドキュメントを現状に更新する | `docs/todo/mobile_responsive_status.md` | 未対応 | 実装済み項目を対応済みに移動し、残課題を再整理する |
-| P1 | Leaflet | ズーム操作時エラーの再発確認を行う | `PostMap.vue` | 要確認 | 連続ズーム、パン、再検索ボタン押下時の挙動を確認する |
+| P1 | Leaflet | ズーム操作時エラーの再発確認を行う | `PostMap.vue` | 完了 | 動作確認 OK |
 | P1 | モバイル対応 | 主要画面を基準幅で確認する | `/login`, `/timeline`, `/search`, `/mypage`, `/map` | 要確認 | `375px` / `390px` / `768px` で横スクロールや導線の破綻を確認する |
 | P1 | モバイル対応 | モーダル表示時の操作性を確認する | `RegisterModal.vue`, `SideUserActions.vue`, `PostDetailModal.vue`, `ReplyModal.vue` | 要確認 | fullscreen 表示、キーボード表示、入力・送信導線を確認する |
 | P1 | モバイル対応 | マップ画面のモバイル操作性を確認する | `map/App.vue`, `PostMap.vue`, `PostPopup.vue` | 要確認 | 地図領域、ズーム操作、再検索ボタン、popup 表示を確認する |
@@ -46,16 +46,20 @@
 - 「詳細を見る」から投稿詳細モーダルを開ける
 - 「このエリアで再検索」後に古い popup app が残らない
 
+確認結果:
+
+- 動作確認 OK
+
 ### P1: ズーム操作時エラーの再発確認を行う
 対象:
 
 - `src/components/post/PostMap.vue`
 
-現状:
+対応状況:
 
 - `map`、`markers`、`zoomControl` は `shallowRef` / `markRaw` で扱うように変更済み
 - 地図操作ごとの自動 API 取得をやめ、「このエリアで再検索」方式へ変更済み
-- ただし、実機またはブラウザでの連続ズーム操作確認は別途必要
+- 連続ズーム操作時のエラー解消を確認済み
 
 確認観点:
 
@@ -63,6 +67,10 @@
 - パンやズームだけでは API が実行されない
 - 「このエリアで再検索」押下時のみ API が実行される
 - 再検索後に marker が更新される
+
+確認結果:
+
+- 動作確認 OK
 
 ### P2: 長期的に Leaflet popup から Vue/Vuetify overlay へ移行するか検討する
 対象:
