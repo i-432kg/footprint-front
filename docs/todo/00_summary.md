@@ -6,7 +6,7 @@
 ## 一覧
 | 優先度 | 分類 | 課題 | 対象 | 状態 | 次アクション |
 | --- | --- | --- | --- | --- | --- |
-| P0 | Leaflet | ポップアップ再表示時の空白化を暫定対応する | `PostMap.vue` | 未対応 | ADR 005 に従い、`popupclose` では unmount せず marker 削除時に cleanup する |
+| P0 | Leaflet | ポップアップ再表示時の空白化を暫定対応する | `PostMap.vue` | 実装済み・要確認 | 同じ marker の popup を開く、閉じる、再度開く操作で中身が表示されるか確認する |
 | P0 | モバイル対応 | モバイル対応状況ドキュメントを現状に更新する | `docs/todo/mobile_responsive_status.md` | 未対応 | 実装済み項目を対応済みに移動し、残課題を再整理する |
 | P1 | Leaflet | ズーム操作時エラーの再発確認を行う | `PostMap.vue` | 要確認 | 連続ズーム、パン、再検索ボタン押下時の挙動を確認する |
 | P1 | モバイル対応 | 主要画面を基準幅で確認する | `/login`, `/timeline`, `/search`, `/mypage`, `/map` | 要確認 | `375px` / `390px` / `768px` で横スクロールや導線の破綻を確認する |
@@ -31,18 +31,13 @@
 
 - `src/components/post/PostMap.vue`
 
-現状:
+対応状況:
 
 - marker の popup に Vue app として `PostPopup` を mount している
-- `popupclose` で `popupApp.unmount()` している
-- Leaflet は `bindPopup(container)` の DOM を再利用するため、次回同じ marker を開くと空白になる
-
-対応方針:
-
-- `docs/adr/adr_005_keep_leaflet_popup_vue_app_alive_until_marker_cleanup.md` に従う
+- `docs/adr/adr_005_keep_leaflet_popup_vue_app_alive_until_marker_cleanup.md` に従って実装済み
 - `popupclose` では `popupApp.unmount()` しない
 - marker と popup app の cleanup をセットで保持する
-- `renderMarkers()` で marker を削除するタイミングで popup app を `unmount()` する
+- `renderMarkers()` とコンポーネント破棄時に popup app を `unmount()` する
 
 確認観点:
 

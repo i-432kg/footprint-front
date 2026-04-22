@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted, ref, shallowRef, markRaw, createApp } from 'vue';
+import { onMounted, onBeforeUnmount, ref, shallowRef, markRaw, createApp } from 'vue';
 import { useMobileLayout } from '@/composables/useMobileLayout';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -61,10 +61,10 @@ const map = shallowRef(null);
 const posts = ref([]);
 
 /**
- * 地図上に描画している Leaflet マーカー一覧。
+ * 地図上に描画している Leaflet マーカーと popup app の cleanup 一覧。
  * 外部クラスの深い Proxy 化を避けるため `shallowRef` と `markRaw` で扱う。
  *
- * @type {import('vue').ShallowRef<import('leaflet').Marker[]>}
+ * @type {import('vue').ShallowRef<{ marker: import('leaflet').Marker, cleanup: Function }[]>}
  */
 const markers = shallowRef([]);
 
@@ -192,15 +192,26 @@ const searchCurrentArea = () => {
 };
 
 /**
+ * 地図上の既存 marker と popup app を破棄する。
+ */
+const cleanupMarkers = () => {
+  if (!map.value) return;
+
+  markers.value.forEach(({ marker, cleanup }) => {
+    cleanup();
+    map.value.removeLayer(marker);
+  });
+  markers.value = [];
+};
+
+/**
  * 現在の投稿一覧を Leaflet マーカーとして地図へ描画する。
  * 既存マーカーは削除し、投稿一覧に基づいて作り直す。
  */
 const renderMarkers = () => {
   if (!map.value) return;
 
-  // 既存のマーカーをすべて削除
-  markers.value.forEach(marker => map.value.removeLayer(marker));
-  markers.value = [];
+  cleanupMarkers();
 
   posts.value.forEach(post => {
     if (post.hasLocation) {
@@ -208,9 +219,6 @@ const renderMarkers = () => {
         L.marker([post.location.lat, post.location.lng], { icon: customIcon })
           .addTo(map.value)
       );
-
-      // 後で削除できるように配列に保持
-      markers.value.push(marker);
 
       const container = document.createElement('div');
       const popupApp = createApp(PostPopup, {
@@ -227,8 +235,10 @@ const renderMarkers = () => {
         minWidth: isMobileMap.value ? 180 : 150
       });
 
-      marker.on('popupclose', () => {
-        popupApp.unmount();
+      // Leaflet は popup DOM を再利用するため、popupclose では破棄しない。
+      markers.value.push({
+        marker,
+        cleanup: () => popupApp.unmount()
       });
     }
   });
@@ -293,6 +303,10 @@ onMounted(() => {
       map.value?.invalidateSize();
     });
   }
+});
+
+onBeforeUnmount(() => {
+  cleanupMarkers();
 });
 </script>
 
