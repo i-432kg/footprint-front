@@ -9,9 +9,9 @@
 | P0 | Leaflet | ポップアップ再表示時の空白化を暫定対応する | `PostMap.vue` | 完了 | 動作確認 OK |
 | P0 | モバイル対応 | モバイル対応状況ドキュメントを現状に更新する | `docs/todo/mobile_responsive_status.md` | 未対応 | 実装済み項目を対応済みに移動し、残課題を再整理する |
 | P1 | Leaflet | ズーム操作時エラーの再発確認を行う | `PostMap.vue` | 完了 | 動作確認 OK |
-| P1 | モバイル対応 | 主要画面を基準幅で確認する | `/login`, `/timeline`, `/search`, `/mypage`, `/map` | 要確認 | `375px` / `390px` / `768px` で横スクロールや導線の破綻を確認する |
-| P1 | モバイル対応 | モーダル表示時の操作性を確認する | `RegisterModal.vue`, `SideUserActions.vue`, `PostDetailModal.vue`, `ReplyModal.vue` | 要確認 | fullscreen 表示、キーボード表示、入力・送信導線を確認する |
-| P1 | モバイル対応 | マップ画面のモバイル操作性を確認する | `map/App.vue`, `PostMap.vue`, `PostPopup.vue` | 要確認 | 地図領域、ズーム操作、再検索ボタン、popup 表示を確認する |
+| P1 | モバイル対応 | 主要画面を基準幅で確認する | `/login`, `/timeline`, `/search`, `/mypage`, `/map` | 完了 | 動作確認 OK |
+| P1 | モバイル対応 | モーダル表示時の操作性を確認する | `RegisterModal.vue`, `SideUserActions.vue`, `PostDetailModal.vue`, `ReplyModal.vue` | 完了 | 動作確認 OK |
+| P1 | モバイル対応 | マップ画面のモバイル操作性を確認する | `map/App.vue`, `PostMap.vue`, `PostPopup.vue` | 完了 | 動作確認 OK |
 | P2 | Leaflet | Leaflet popup から Vue/Vuetify overlay への移行を検討する | `PostMap.vue`, `PostPopup.vue` | 将来検討 | marker は選択のみ担当し、投稿プレビューを Vue 側 overlay に寄せるか検討する |
 | P2 | モバイル対応 | 残っている scoped CSS の扱いを確認する | scoped CSS が残る各コンポーネント | 継続確認 | Vuetify utility で代替可能なものを整理し、必要な CSS は残す |
 
@@ -124,6 +124,10 @@
 - ヘッダーの検索、メニュー、MyPage 導線が各画面で利用できる
 - FAB、モーダル、再検索ボタンが操作しやすい
 
+確認結果:
+
+- 動作確認 OK
+
 ### P1: モーダル表示時の操作性を確認する
 対象:
 
@@ -139,6 +143,10 @@
 - キーボード表示時に入力欄や送信ボタンが大きく隠れない
 - 投稿作成モーダルで画像選択、プレビュー、コメント入力が問題なくできる
 
+確認結果:
+
+- 動作確認 OK
+
 ### P1: マップ画面のモバイル操作性を確認する
 対象:
 
@@ -153,6 +161,10 @@
 - 「このエリアで再検索」ボタンがヘッダーやズームコントロールと干渉しない
 - marker popup がモバイル幅で見切れない
 - 投稿詳細モーダルが fullscreen で表示される
+
+確認結果:
+
+- 動作確認 OK
 
 ### P2: 残っている scoped CSS の扱いを確認する
 対象例:
@@ -170,9 +182,6 @@
 - Leaflet や line-clamp など、utility だけでは代替しづらいものは scoped CSS を許容する
 
 ## 優先順
-1. `PostMap.vue` の popup 空白化を ADR 005 の方針で修正する
-2. Leaflet ズーム操作と再検索方式の動作確認を行う
-3. `docs/todo/mobile_responsive_status.md` を現状に更新する
-4. `375px` / `390px` / `768px` で主要画面を確認する
-5. モーダルとマップ画面の操作性を実機で確認する
-6. scoped CSS の残存箇所を必要に応じて整理する
+1. `docs/todo/mobile_responsive_status.md` を現状に更新する
+2. scoped CSS の残存箇所を必要に応じて整理する
+3. Leaflet popup から Vue/Vuetify overlay への移行を将来検討する
