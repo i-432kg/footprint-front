@@ -11,9 +11,8 @@
     "build": "vite build",
     "build:stg": "vite build --mode staging",
     "preview": "vite preview",
-    "lint": "run-s lint:*",
-    "lint:oxlint": "oxlint . --fix",
-    "lint:eslint": "eslint . --fix --cache"
+    "lint": "eslint . --cache",
+    "lint:fix": "eslint . --fix --cache"
   },
   "dependencies": {
     "@mdi/font": "^7.4.47",
@@ -28,11 +27,8 @@
     "@types/leaflet": "^1.9.21",
     "@vitejs/plugin-vue": "^6.0.3",
     "eslint": "^9.39.2",
-    "eslint-plugin-oxlint": "~1.38.0",
     "eslint-plugin-vue": "~10.6.2",
     "globals": "^17.0.0",
-    "npm-run-all2": "^8.0.4",
-    "oxlint": "~1.38.0",
     "sass": "^1.97.3",
     "vite": "beta",
     "vite-plugin-devtools-json": "^1.0.0",
