@@ -158,7 +158,7 @@ const refreshPosts = () => {
     <!-- サイドバー -->
     <template #sidebar>
       <SideUserActions @submitted="refreshPosts" />
-      <SideRecommendation />
+<!--      <SideRecommendation />-->
     </template>
 
     <!-- モーダル類 -->

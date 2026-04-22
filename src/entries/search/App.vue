@@ -112,7 +112,7 @@ onMounted( () => {
     <!-- サイドバー -->
     <template #sidebar>
       <SideUserActions />
-      <SideSearchOption />
+<!--      <SideSearchOption />-->
     </template>
 
     <!-- モーダル類 -->
