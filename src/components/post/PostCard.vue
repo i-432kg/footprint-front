@@ -1,7 +1,7 @@
 <script setup>
 import { useDateFormatter } from "@/composables/useDateFormatter.js";
 
-const props = defineProps({
+defineProps({
   post: { type: Object, required: true },
   viewMode: { type: String, default: 'list' } // 'list' | 'grid'
 });

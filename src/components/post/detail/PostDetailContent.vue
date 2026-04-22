@@ -7,7 +7,7 @@ import { useDateFormatter } from "@/composables/useDateFormatter.js";
  * - 投稿の画像、本文（コメント）、緯度経度、投稿日時を表示する
  * - 「投稿への返信」ボタンが押されたら、親へ通知する
  */
-const props = defineProps({
+defineProps({
   // 投稿詳細データ
   post: { type: Object, required: true }
 });
@@ -95,7 +95,3 @@ const { formatDate } = useDateFormatter();
     </div>
   </v-container>
 </template>
-
-<style scoped>
-
-</style>
