@@ -1,44 +1,176 @@
-# footprint-front
+# Footprint Frontend
 
-This template should help get you started developing with Vue 3 in Vite.
+Footprint Frontend は、位置情報付き写真投稿アプリ「Footprint」のフロントエンドリポジトリです。  
+Vue 3 + Vite を用いて構築しており、バックエンド API と連携してログイン、タイムライン表示、投稿作成、地図表示、マイページ表示などの機能を提供します。
 
-## Recommended IDE Setup
+このリポジトリでは、フロントエンドの実装・セットアップ方法・ディレクトリ構成を中心にまとめています。  
+アプリ全体の紹介やアーキテクチャ方針はバックエンドリポジトリ、DB 定義や API 定義などの詳細設計資料は docs リポジトリで公開する想定です。
 
-[VS Code](https://code.visualstudio.com/) + [Vue (Official)](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur).
+---
 
-## Recommended Browser Setup
+## 関連リンク
 
-- Chromium-based browsers (Chrome, Edge, Brave, etc.):
-  - [Vue.js devtools](https://chromewebstore.google.com/detail/vuejs-devtools/nhdogjmejiglipccpnnnanhbledajbpd)
-  - [Turn on Custom Object Formatter in Chrome DevTools](http://bit.ly/object-formatters)
-- Firefox:
-  - [Vue.js devtools](https://addons.mozilla.org/en-US/firefox/addon/vue-js-devtools/)
-  - [Turn on Custom Object Formatter in Firefox DevTools](https://fxdx.dev/firefox-devtools-custom-object-formatters/)
+- Frontend Repository  
+  https://github.com/i-432kg/footprint-front/tree/develop
+- Backend Repository  
+  https://github.com/i-432kg/footprint/tree/develop
+- Docs Repository  
+  （公開後に URL を記載）
+- Staging Environment  
+  （公開用 URL を記載）
 
-## Customize configuration
+---
 
-See [Vite Configuration Reference](https://vite.dev/config/).
+## 使用技術
 
-## Project Setup
+### フレームワーク・ライブラリ
+- Vue 3
+- Vite
+- Vuetify
+- Pinia
+- Axios
+- Leaflet
+- Sass
 
-```sh
+### 開発・品質管理
+- ESLint
+- Oxlint
+- npm-run-all2
+
+### その他
+- マルチエントリ構成
+- `/api` の Vite プロキシによるバックエンド連携
+
+---
+
+## 主な機能
+
+- ログイン画面
+- タイムライン画面
+- 投稿詳細表示
+- 投稿作成
+- 地図表示
+- マイページ表示
+- 検索画面
+
+※ 詳細な機能仕様や画面設計は、バックエンドリポジトリまたは docs リポジトリで管理する想定です。
+
+---
+
+## 使い方
+
+### ステージング環境で利用する場合
+1. Staging Environment の URL にアクセスします。
+2. ログイン後、タイムラインやマップ画面などの動作を確認します。
+
+### ローカルで確認する場合
+1. バックエンドリポジトリを起動します。
+2. 本リポジトリを起動します。
+3. フロントエンドからバックエンド API に接続して画面動作を確認します。
+
+---
+
+## 動作環境
+
+- Node.js: `^20.19.0 || >=22.12.0`
+- npm: Node.js に付属するバージョンを利用
+
+---
+
+## セットアップ手順
+
+### 1. リポジトリを取得
+```bash
+git clone https://github.com/i-432kg/footprint-front.git
+cd footprint-front
+```
+
+### 2. 依存パッケージをインストール
+```bash
 npm install
 ```
 
-### Compile and Hot-Reload for Development
+### 3. 必要に応じて環境変数を設定
+環境変数ファイルを利用している場合は、ローカル用の設定を行ってください。  
+利用する env ファイルの運用ルールは、プロジェクト方針に合わせて適宜調整してください。
 
-```sh
+### 4. 開発サーバを起動
+```bash
 npm run dev
 ```
 
-### Compile and Minify for Production
-
-```sh
+### 5. ビルド
+```bash
 npm run build
 ```
 
-### Lint with [ESLint](https://eslint.org/)
+### 6. ステージング向けビルド
+```bash
+npm run build:stg
+```
 
-```sh
+### 7. Lint 実行
+```bash
 npm run lint
 ```
+
+---
+
+## 環境変数
+
+このリポジトリで使用する環境変数がある場合は、ここに一覧化してください。  
+少なくとも以下の観点が分かるようにしておくと、第三者がセットアップしやすくなります。
+
+| 変数名 | 用途 | 例 |
+|---|---|---|
+| `VITE_...` | フロントエンド用設定値 | `example` |
+
+※ 実際に使用している環境変数が確定したら、この表を実プロジェクトの内容に合わせて更新してください。
+
+---
+
+## API 接続について
+
+ローカル開発時は、Vite のプロキシ設定により `/api` へのリクエストをバックエンドへ転送する構成です。  
+バックエンドは別リポジトリで管理しているため、ローカル動作確認時はバックエンドアプリケーションもあわせて起動してください。
+
+---
+
+## ディレクトリ構成
+
+```text
+src/
+├─ assets/        # 画像・スタイルなどの静的リソース
+├─ components/    # 再利用可能な UI コンポーネント
+├─ composables/   # Vue Composition API の共通ロジック
+├─ constants/     # 定数定義
+├─ entries/       # 各画面のエントリポイント
+├─ models/        # 画面・通信で利用するモデル
+├─ plugins/       # Vue / Vuetify などのプラグイン設定
+├─ services/      # API 通信や外部連携処理
+├─ stores/        # Pinia ストア
+└─ utils/         # 汎用ユーティリティ（ログ・バリデーション）
+```
+
+---
+
+## 補足資料
+
+アプリ全体の説明や詳細設計は、以下のリポジトリで参照できるようにする想定です。
+
+- バックエンドリポジトリ  
+  アプリ概要、技術選定、アーキテクチャ方針、インフラ構成など
+- docs リポジトリ  
+  DB 定義、API 定義、画面設計、詳細設計資料など
+
+---
+
+## 今後の改善予定
+
+- フロントエンドのユニットテスト導入
+- コンポーネントテストの追加
+- E2E テストの追加
+- README の補強（画面キャプチャ、環境変数一覧、stg 利用方法の明確化）
+- docs リポジトリへの設計資料整理
+
+---
