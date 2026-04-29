@@ -43,9 +43,9 @@ const { isMobile: isMobileResultItem } = useMobileLayout();
             class="d-flex text-caption text-medium-emphasis"
             :class="isMobileResultItem ? 'flex-column align-start ga-1' : 'align-center justify-space-between'"
           >
-            <span v-if="post.hasLocation" class="d-inline-flex align-center">
+            <span class="d-inline-flex align-center">
               <v-icon size="x-small" color="primary" class="mr-1">mdi-map-marker</v-icon>
-              {{ post.location.lat.toFixed(4) }}, {{ post.location.lng.toFixed(4) }}
+              {{ post.hasLocation ? `${post.location.lat.toFixed(4)}, ${post.location.lng.toFixed(4)}` : '位置情報不明' }}
             </span>
             <span>{{ formatDate(post.createdAt) }}</span>
           </div>

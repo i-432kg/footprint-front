@@ -65,14 +65,13 @@ const { formatDate } = useDateFormatter();
 
       <!-- 緯度経度表示 -->
       <v-chip
-        v-if="post.hasLocation"
         size="small"
         color="primary"
         variant="tonal"
         prepend-icon="mdi-map-marker"
         class="mb-6"
       >
-        {{ post.location.lat.toFixed(4) }}, {{ post.location.lng.toFixed(4) }}
+        {{ post.hasLocation ? `${post.location.lat.toFixed(4)}, ${post.location.lng.toFixed(4)}` : '位置情報不明' }}
       </v-chip>
 
       <!-- メタ情報とアクション -->

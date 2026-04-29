@@ -27,8 +27,8 @@ const { formatDate } = useDateFormatter();
     <!-- リスト表示の時だけ下部に情報を出す -->
     <v-card-text v-if="viewMode === 'list'" class="d-flex align-center py-2 px-3">
       <v-icon size="x-small" color="primary" class="mr-1">mdi-map-marker</v-icon>
-      <span class="text-caption text-medium-emphasis" v-if="post.hasLocation">
-        {{ post.location.lat.toFixed(2) }}, {{ post.location.lng.toFixed(2) }}
+      <span class="text-caption text-medium-emphasis">
+        {{ post.hasLocation ? `${post.location.lat.toFixed(2)}, ${post.location.lng.toFixed(2)}` : '位置情報不明' }}
       </span>
       <v-spacer></v-spacer>
       <span class="text-caption text-medium-emphasis">{{ formatDate(post.createdAt) }}</span>
