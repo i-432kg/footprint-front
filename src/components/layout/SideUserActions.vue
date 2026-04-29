@@ -173,7 +173,7 @@ const closeModal = () => {
       size="large"
       @click="openModal"
     >
-      今どうしてる？
+      足あとを残す
     </v-btn>
   </v-card>
 
