@@ -10,9 +10,7 @@ export const mapToUser = (raw) => {
     email: raw.email || '',
     // 投稿数や返信数をUIで表示しやすい名前で保持
     postCount: raw.postCount || 0,
-    replyCount: raw.replyCount || 0,
-    // 必要に応じて、アイコンURLなどのデフォルト値をここで設定可能
-    avatarUrl: `https://api.dicebear.com/7.x/avataaars/svg?seed=${raw.username}`
+    replyCount: raw.replyCount || 0
   };
 };
 

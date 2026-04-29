@@ -22,8 +22,7 @@ const PAGE_SIZE = 6;
 const user = ref({
   username: '',
   postCount: 0,
-  replyCount: 0,
-  avatarUrl: ''
+  replyCount: 0
 });
 
 /** 投稿リストの状態管理 */
@@ -128,8 +127,7 @@ onMounted(async () => {
               :size="isMobileMypage ? 64 : 80"
               class="text-h4 text-white"
             >
-              <v-img v-if="user.avatarUrl" :src="user.avatarUrl"></v-img>
-              <span v-else>{{ user?.username?.charAt(0) || '?' }}</span>
+              {{ user?.username?.charAt(0) || '?' }}
             </v-avatar>
           </v-col>
           <v-col>
