@@ -133,7 +133,7 @@ const refreshPosts = () => {
     <!-- メインコンテンツ -->
     <template #main>
       <!-- 投稿リスト -->
-      <v-row :dense="isDense">
+      <v-row v-if="posts.length > 0" :dense="isDense">
         <v-col
           v-for="post in posts"
           :key="post.id"
@@ -148,7 +148,17 @@ const refreshPosts = () => {
       <!-- 監視用の目印 ＆ ローダー -->
       <div ref="scrollObserver" class="text-center py-10">
         <v-progress-circular v-if="isLoading" indeterminate color="primary"></v-progress-circular>
-        <p v-else-if="!hasMore && posts.length > 0" class="text-caption text-medium-emphasis">
+
+        <v-alert
+          v-else-if="posts.length === 0"
+          type="info"
+          variant="tonal"
+          class="rounded-xl"
+        >
+          まだ投稿がありません。
+        </v-alert>
+
+        <p v-else-if="!hasMore" class="text-caption text-medium-emphasis">
           すべての投稿を表示しました
         </p>
       </div>
