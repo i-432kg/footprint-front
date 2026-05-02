@@ -27,6 +27,7 @@ export const LOG_EVENTS = {
     CREATE_SUCCESS: { event: 'POST_CREATE_SUCCESS', message: 'Post created successfully' },
     CREATE_FAILED: { event: 'POST_CREATE_FAILED', message: 'Post creation failed' },
     CREATE_VALIDATION_FAIL: { event: 'POST_CREATE_VALIDATION_FAIL', message: 'Post creation validation failed' },
+    MAP_BBOX_FETCH: { event: 'POST_MAP_BBOX_FETCH', message: 'Fetching posts in map boundary' },
     MAP_MOVE: { event: 'POST_MAP_MOVE', message: 'Map boundary changed' },
   },
 

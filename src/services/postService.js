@@ -26,7 +26,7 @@ export default {
   async searchMap(minLat, maxLat, minLng, maxLng) {
     const data =
       await apiClient.get('/posts/search/map',
-        withLog(LOG_EVENTS.POST.SEARCH_FETCH, { params: { minLat, maxLat, minLng, maxLng } })
+        withLog(LOG_EVENTS.POST.MAP_BBOX_FETCH, { params: { minLat, maxLat, minLng, maxLng } })
       );
     return mapToPostList(data);
   },
