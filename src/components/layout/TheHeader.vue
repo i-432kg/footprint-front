@@ -3,6 +3,7 @@ import { ref, onMounted } from 'vue';
 import { useMobileLayout } from '@/composables/useMobileLayout';
 import { uiLogger } from '@/utils/logger';
 import { LOG_EVENTS } from '@/constants/logEvents';
+import userService from '@/services/userService';
 
 /**
  * ヘッダーの検索入力値。
@@ -27,6 +28,12 @@ const isSearchOpen = ref(false);
  * @type {import('vue').Ref<boolean>}
  */
 const isMenuOpen = ref(false);
+
+/**
+ * ログアウト処理の実行中フラグ。
+ * @type {import('vue').Ref<boolean>}
+ */
+const isLoggingOut = ref(false);
 
 /**
  * 現在のブラウザパス。
@@ -71,6 +78,26 @@ const toggleMobileSearch = () => {
 
   if (isSearchOpen.value) {
     isMenuOpen.value = false;
+  }
+};
+
+/**
+ * ログアウトを実行してログイン画面へ遷移する。
+ */
+const handleLogout = async () => {
+  if (isLoggingOut.value) return;
+
+  isLoggingOut.value = true;
+
+  try {
+    await userService.logout();
+    uiLogger.info(LOG_EVENTS.AUTH.LOGOUT_SUCCESS);
+    window.location.href = '/login';
+  } catch (error) {
+    uiLogger.warn(LOG_EVENTS.AUTH.LOGOUT_FAILURE, { reason: error.message });
+    alert('ログアウトに失敗しました。時間をおいて再度お試しください。');
+  } finally {
+    isLoggingOut.value = false;
   }
 };
 
@@ -140,8 +167,33 @@ onMounted(() => {
         @click="toggleMobileSearch"
       ></v-btn>
 
-      <!-- マイページ -->
-      <v-btn icon="mdi-account-circle" href="/mypage" title="MyPage"></v-btn>
+      <!-- アカウントメニュー -->
+      <v-menu location="bottom end">
+        <template #activator="{ props }">
+          <v-btn
+            icon="mdi-account-circle"
+            title="Account"
+            aria-label="アカウントメニューを開く"
+            v-bind="props"
+          ></v-btn>
+        </template>
+
+        <v-list min-width="200" density="compact">
+          <v-list-item href="/mypage" prepend-icon="mdi-account-circle">
+            <v-list-item-title>マイページ</v-list-item-title>
+          </v-list-item>
+
+          <v-divider></v-divider>
+
+          <v-list-item
+            prepend-icon="mdi-logout"
+            :disabled="isLoggingOut"
+            @click="handleLogout"
+          >
+            <v-list-item-title>ログアウト</v-list-item-title>
+          </v-list-item>
+        </v-list>
+      </v-menu>
 
       <!-- モバイルメニュー -->
       <v-menu v-if="isMobileHeader" v-model="isMenuOpen" location="bottom end">

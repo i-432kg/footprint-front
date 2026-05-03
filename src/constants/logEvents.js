@@ -7,6 +7,8 @@ export const LOG_EVENTS = {
     LOGIN_SUCCESS: { event: 'AUTH_LOGIN_SUCCESS', message: 'User logged in successfully' },
     LOGIN_FAILURE: { event: 'AUTH_LOGIN_FAILURE', message: 'User login failed' },
     LOGIN_VALIDATION_FAIL: { event: 'AUTH_LOGIN_VALIDATION_FAIL', message: 'Login validation failed' },
+    LOGOUT_SUCCESS: { event: 'AUTH_LOGOUT_SUCCESS', message: 'User logged out successfully' },
+    LOGOUT_FAILURE: { event: 'AUTH_LOGOUT_FAILURE', message: 'User logout failed' },
     SIGNUP_SUCCESS: { event: 'AUTH_SIGNUP_SUCCESS', message: 'User signed up successfully' },
     SIGNUP_FAILURE: { event: 'AUTH_SIGNUP_FAILURE', message: 'User signup failed' },
     SIGNUP_VALIDATION_FAIL: { event: 'AUTH_SIGNUP_VALIDATION_FAIL', message: 'Signup validation failed' },

@@ -47,6 +47,11 @@ export default {
     );
   },
 
+  /** ログアウト実行 */
+  logout() {
+    return apiClient.post('/logout', undefined, withLog(LOG_EVENTS.AUTH.LOGOUT_SUCCESS));
+  },
+
   /** ユーザー登録 */
   async signup(formData) {
     // フォームの生データをAPI用のリクエスト形式に変換
