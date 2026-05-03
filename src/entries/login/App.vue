@@ -5,8 +5,6 @@ import LoginForm from '@/components/login/LoginForm.vue';
 import RegisterModal from '@/components/login/RegisterModal.vue';
 import TheFooter from '@/components/layout/TheFooter.vue';
 
-const titleLogoUrl = new URL('../../assets/footprint-title-logo.svg', import.meta.url).href;
-
 /**
  * ログイン・新規登録画面
  *
@@ -14,6 +12,12 @@ const titleLogoUrl = new URL('../../assets/footprint-title-logo.svg', import.met
  * - 既存ユーザーのログイン処理
  * - 新規ユーザー登録モーダルの制御（入力・確認・送信）
  */
+
+/**
+ * タイトルロゴ画像のURL。
+ * @type {string}
+ */
+const titleLogoUrl = new URL('../../assets/footprint-title-logo.svg', import.meta.url).href;
 
 /**
  * モバイル向けログイン画面レイアウトかどうか。
