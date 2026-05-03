@@ -60,8 +60,8 @@ const onRegistered = () => {
                 :width="isMobileLogin ? 280 : 480"
                 class="mb-4 mb-md-6"
               />
-              <p class="text-blue-grey-darken-4 text-h6 text-md-h4 font-weight-bold">
-                思い出の場所を見つけて、記録して、だれかの次の一歩につなげよう。
+              <p class="text-blue-grey-darken-4 text-h6 text-md-h5 font-weight-bold text-no-wrap">
+                あなたの足あとを、地図の上に記録しよう。
               </p>
             </section>
           </v-col>
