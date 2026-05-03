@@ -19,7 +19,7 @@ Vue 3 + Vite + Vuetify を使い、Spring Boot / Thymeleaf が描画するペー
 
 ## 画面一覧
 
-現在のエントリポイントは以下の 5 画面です。
+現在のエントリポイントは以下の 8 画面です。
 
 | 画面 | パス | エントリ |
 | --- | --- | --- |
@@ -28,6 +28,9 @@ Vue 3 + Vite + Vuetify を使い、Spring Boot / Thymeleaf が描画するペー
 | 地図表示 | `/map` | `src/entries/map/main.js` |
 | マイページ | `/mypage` | `src/entries/mypage/main.js` |
 | 検索結果 | `/search?q=...` | `src/entries/search/main.js` |
+| About | `/about` | `src/entries/about/main.js` |
+| 利用規約 | `/terms` | `src/entries/terms/main.js` |
+| プライバシーポリシー | `/privacy` | `src/entries/privacy/main.js` |
 
 ## 実装済みの主な機能
 
@@ -95,7 +98,7 @@ Vite 開発サーバは `http://localhost:5173` で起動し、`/api` へのリ�
 ## ビルド成果物
 
 - Vite の `manifest.json` を出力します
-- ビルドエントリは `login` / `map` / `mypage` / `search` / `timeline` です
+- ビルドエントリは `about` / `login` / `map` / `mypage` / `privacy` / `search` / `terms` / `timeline` です
 - 出力ファイルは `assets/` 配下へまとめられます
 
 バックエンド側はこの manifest を参照して各ページに対応するフロントエンド資産を読み込む想定です。

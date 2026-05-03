@@ -38,10 +38,13 @@ export default defineConfig(({ command, mode }) => {
       manifest: 'manifest.json',
       rollupOptions: {
         input: {
+          about: resolve(rootDir, 'src/entries/about/main.js'),
           login: resolve(rootDir, 'src/entries/login/main.js'),
           map: resolve(rootDir, 'src/entries/map/main.js'),
           mypage: resolve(rootDir, 'src/entries/mypage/main.js'),
+          privacy: resolve(rootDir, 'src/entries/privacy/main.js'),
           search: resolve(rootDir, 'src/entries/search/main.js'),
+          terms: resolve(rootDir, 'src/entries/terms/main.js'),
           timeline: resolve(rootDir, 'src/entries/timeline/main.js'),
         },
         output: {
