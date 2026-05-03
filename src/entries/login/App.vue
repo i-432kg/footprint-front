@@ -3,6 +3,7 @@ import { ref } from 'vue';
 import { useMobileLayout } from '@/composables/useMobileLayout';
 import LoginForm from '@/components/login/LoginForm.vue';
 import RegisterModal from '@/components/login/RegisterModal.vue';
+import TheFooter from '@/components/layout/TheFooter.vue';
 
 const titleLogoUrl = new URL('../../assets/footprint-title-logo.svg', import.meta.url).href;
 
@@ -101,6 +102,9 @@ const onRegistered = () => {
         </v-row>
       </v-container>
     </v-main>
+
+    <!-- フッター -->
+    <TheFooter />
 
     <!-- 新規登録モーダル -->
     <RegisterModal
