@@ -53,7 +53,7 @@ Vue 3 + Vite + Vuetify を使い、Spring Boot / Thymeleaf が描画するペー
 
 ## 動作環境
 
-- Node.js: `^20.19.0 || >=22.12.0`
+- Node.js: `^24.14.1`
 - npm: Node.js 同梱版
 
 ## セットアップ
