@@ -2,6 +2,12 @@
 import TheFooter from '@/components/layout/TheFooter.vue';
 
 /**
+ * ヘッダーロゴ画像のURL。
+ * @type {string}
+ */
+const headerLogoUrl = new URL('../../assets/footprint-title-logo.svg', import.meta.url).href;
+
+/**
  * 静的ページのタイトル。
  * @type {string}
  */
@@ -21,11 +27,15 @@ defineProps({
   <v-app>
     <v-app-bar color="white" flat border density="compact" class="px-2 px-md-4">
       <!-- ロゴ -->
-      <v-app-bar-title class="flex-shrink-0">
-        <v-btn variant="plain" href="/login" class="text-h6 font-weight-bold text-primary pa-0">
-          Footprint
-        </v-btn>
-      </v-app-bar-title>
+      <v-btn variant="plain" href="/login" class="pa-0" width="132" height="40" min-width="0">
+        <img
+          :src="headerLogoUrl"
+          alt="Footprint"
+          width="132"
+          height="38"
+          class="d-block"
+        >
+      </v-btn>
     </v-app-bar>
 
     <v-main class="bg-grey-lighten-5">

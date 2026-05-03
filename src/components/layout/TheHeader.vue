@@ -6,6 +6,12 @@ import { LOG_EVENTS } from '@/constants/logEvents';
 import userService from '@/services/userService';
 
 /**
+ * ヘッダーロゴ画像のURL。
+ * @type {string}
+ */
+const headerLogoUrl = new URL('../../assets/footprint-title-logo.svg', import.meta.url).href;
+
+/**
  * ヘッダーの検索入力値。
  * @type {import('vue').Ref<string>}
  */
@@ -118,11 +124,15 @@ onMounted(() => {
       :extension-height="isMobileHeader && isSearchOpen ? 64 : 0"
     >
       <!-- ロゴ -->
-      <v-app-bar-title class="flex-shrink-0" style="min-width: 0;">
-        <v-btn variant="plain" href="/" class="text-h6 font-weight-bold text-primary pa-0">
-          LOGO
-        </v-btn>
-      </v-app-bar-title>
+      <v-btn variant="plain" href="/" class="pa-0 mr-2" width="132" height="40" min-width="0">
+        <img
+          :src="headerLogoUrl"
+          alt="Footprint"
+          width="132"
+          height="38"
+          class="d-block"
+        >
+      </v-btn>
 
       <template v-if="!isMobileHeader">
         <!-- ナビゲーション -->
