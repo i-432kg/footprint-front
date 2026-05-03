@@ -40,7 +40,7 @@ const onRegistered = () => {
     >
       <v-container class="px-4 py-6">
         <v-row justify="center">
-          <v-col cols="12" sm="8" md="4">
+          <v-col cols="12" class="login-card-col">
 
             <!-- ヘッダーエリア -->
             <v-card
@@ -94,3 +94,9 @@ const onRegistered = () => {
     />
   </v-app>
 </template>
+
+<style scoped>
+.login-card-col {
+  max-width: 480px;
+}
+</style>
