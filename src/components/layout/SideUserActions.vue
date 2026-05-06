@@ -222,7 +222,7 @@ const closeModal = () => {
             v-model="selectedFile"
             :rules="postRules.image"
             label="画像を選択（必須）"
-            accept="image/*"
+            accept="image/jpeg,image/png,image/gif"
             prepend-icon="mdi-camera"
             variant="filled"
             rounded="lg"

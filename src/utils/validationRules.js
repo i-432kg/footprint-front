@@ -35,9 +35,9 @@ export const rules = {
   },
 
   /** ファイル形式チェック */
-  imageType: (message = '画像ファイル(jpg, png, webp)を選択してください') => v => {
+  imageType: (message = '画像ファイル(jpg, png, gif)を選択してください') => v => {
     if (!v) return true;
     const file = Array.isArray(v) ? v[0] : v;
-    return /^image\/(jpeg|jpg|png|webp)$/.test(file.type) || message;
+    return /^image\/(jpeg|jpg|png|gif)$/.test(file.type) || message;
   }
 };
