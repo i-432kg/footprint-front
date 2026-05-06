@@ -22,6 +22,12 @@ const emit = defineEmits(['submitted']);
 
 const userStore = useUserStore();
 
+/** 投稿画像の最大サイズ（MB） */
+const POST_IMAGE_MAX_SIZE_MB = 10;
+
+/** 投稿画像の最大サイズ（bytes） */
+const POST_IMAGE_MAX_SIZE_BYTES = POST_IMAGE_MAX_SIZE_MB * 1024 * 1024;
+
 /**
  * モバイル向け投稿導線かどうか。
  * `true` の場合は右下 FAB から投稿モーダルを開く。
@@ -64,7 +70,7 @@ const isValid = ref(false);
 const postRules = {
   image: [
     commonRules.required(VALIDATION_MESSAGES.SELECT_REQUIRED('画像')),
-    commonRules.fileSize(5),
+    commonRules.fileSize(POST_IMAGE_MAX_SIZE_MB),
     commonRules.imageType()
   ],
   content: [
@@ -85,10 +91,16 @@ const onFileChange = (event) => {
 
   const files = event.target.files;
   if (files && files.length > 0) {
-    selectedFile.value = files[0];
+    const file = files[0];
+    selectedFile.value = file;
+
+    // サイズ超過ファイルはプレビュー表示しない
+    if (file.size > POST_IMAGE_MAX_SIZE_BYTES) {
+      return;
+    }
 
     // 画像プレビューを作成
-    previewUrl.value = URL.createObjectURL(files[0]);
+    previewUrl.value = URL.createObjectURL(file);
   } else {
     selectedFile.value = null;
   }
