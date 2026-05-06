@@ -1,0 +1,137 @@
+<script setup>
+import { computed, ref } from 'vue';
+import { useDateFormatter } from "@/composables/useDateFormatter.js";
+import { useReplyStore } from "@/stores/replyStore.js";
+import { uiLogger } from '@/utils/logger';
+import { LOG_EVENTS } from '@/constants/logEvents';
+
+/**
+ * 返信（コメント）を 1 件表示するコンポーネント
+ *
+ * - 返信本文、日時、返信ボタンを表示する
+ * - 「n件の返信を表示/非表示」を制御し、必要なら子返信一覧を取得する
+ * - 子返信は Pinia（replyStore）のキャッシュを参照して表示する
+ */
+const props = defineProps({
+  // 表示する返信データ
+  reply: { type: Object, required: true },
+
+  // 子返信として表示する場合、見た目を変えるためのフラグ（インデント/背景色など）
+  isChild: { type: Boolean, default: false }
+});
+
+const emit = defineEmits(['reply']);
+const { formatDate } = useDateFormatter();
+const replyStore = useReplyStore();
+const isLoading = ref(false);
+
+/**
+ * この返信（reply.id）に紐づく子返信一覧（キャッシュ）
+ * - 未取得なら空配列
+ * - 取得済みなら replyStore が保持している配列
+ */
+const children = computed(() => replyStore.getChildReplies(props.reply.id));
+
+/**
+ * この返信の子返信一覧を「表示中かどうか」
+ */
+const showChildren = computed(() => replyStore.isExpanded(props.reply.id));
+
+/**
+ * 返信ボタンクリック時のハンドリング
+ */
+const handleReplyClick = () => {
+  uiLogger.info(LOG_EVENTS.REPLY.BUTTON_CLICK, { replyId: props.reply.id });
+  emit('reply', props.reply.id);
+};
+
+/**
+ * 「n件の返信を表示/非表示」をトグルする
+ */
+const toggleChildren = async () => {
+  // すでに開いていれば閉じる
+  if (showChildren.value) {
+    replyStore.collapse(props.reply.id);
+    return;
+  }
+
+  // ログ記録：子返信の展開（どの返信に対してかIDを含める）
+  uiLogger.info(LOG_EVENTS.REPLY.LIST_EXPAND, { replyId: props.reply.id });
+
+  replyStore.expand(props.reply.id);
+
+  // 初回だけ取得（未取得の場合のみ）
+  if (children.value.length === 0) {
+    isLoading.value = true;
+    try {
+      await replyStore.fetchChildReplies(props.reply.id);
+    } finally {
+      isLoading.value = false;
+    }
+  }
+};
+</script>
+
+<template>
+  <div class="reply-wrapper mb-4">
+    <v-card
+      variant="outlined"
+      :color="isChild ? 'grey-lighten-3' : 'grey-lighten-2'"
+      :class="['rounded-lg', { 'bg-grey-lighten-5': isChild, 'bg-white': !isChild }]"
+    >
+      <v-card-text class="pa-3 text-black">
+        <!-- 返信本文 -->
+        <p class="text-body-2 mb-2 text-black" style="white-space: pre-wrap;">{{ reply.message }}</p>
+
+        <!-- メタ情報と返信ボタン -->
+        <v-row align="center" no-gutters>
+          <span class="text-caption text-black">
+            {{ formatDate(reply.createdAt) }}
+          </span>
+          <v-spacer></v-spacer>
+          <v-btn
+            variant="text"
+            color="primary"
+            rounded="pill"
+            prepend-icon="mdi-reply"
+            size="small"
+            @click="handleReplyClick"
+          >
+            返信する
+          </v-btn>
+        </v-row>
+      </v-card-text>
+
+      <!-- 子返信の展開トリガー -->
+      <v-divider v-if="reply.hasChildren || children.length > 0"></v-divider>
+      <v-card-actions v-if="reply.hasChildren || children.length > 0" class="pa-1">
+        <v-btn
+          variant="text"
+          block
+          size="small"
+          class="text-none text-black"
+          :loading="isLoading"
+          @click="toggleChildren"
+        >
+          <template v-slot:prepend>
+            <v-icon :icon="showChildren ? 'mdi-chevron-down' : 'mdi-chevron-right'"></v-icon>
+          </template>
+          {{ showChildren ? '返信を非表示' : `${reply.childCount || children.length} 件の返信を表示` }}
+        </v-btn>
+      </v-card-actions>
+    </v-card>
+
+    <!-- 子返信一覧 -->
+    <v-expand-transition>
+      <div v-if="showChildren" class="child-replies mt-2 ml-4 ml-sm-8">
+        <ReplyItem
+          v-for="child in children"
+          :key="child.id"
+          :reply="child"
+          :isChild="true"
+          @reply="(id) => emit('reply', id)"
+        />
+      </div>
+    </v-expand-transition>
+  </div>
+</template>
