@@ -60,8 +60,14 @@ const onRegistered = () => {
                 :width="isMobileLogin ? 280 : 480"
                 class="mb-4 mb-md-6"
               />
-              <p class="text-blue-grey-darken-4 text-h6 text-md-h5 font-weight-bold text-no-wrap">
-                あなたの足あとを、地図の上に記録しよう。
+              <p class="text-blue-grey-darken-4 text-h6 text-md-h5 font-weight-bold">
+                <span v-if="isMobileLogin">
+                  あなたの足あとを、<br>
+                  地図の上に記録しよう。
+                </span>
+                <span v-else class="text-no-wrap">
+                  あなたの足あとを、地図の上に記録しよう。
+                </span>
               </p>
             </section>
           </v-col>
